@@ -9,39 +9,76 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       height: 100vh;
       background: #f5f5f7;
+      padding: 20px;
     }
-    h1 { margin-bottom: 20px; }
+    h1 { margin: 10px; font-size: 32px; }
+    
+    /* Placar */
+    #placar {
+      display: flex;
+      gap: 40px;
+      font-size: 28px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .timeA { color: #007aff; }
+    .timeB { color: #ff3b30; }
+
+    /* Botões */
     button {
-      font-size: 24px;
-      padding: 20px 40px;
-      margin: 10px;
-      border-radius: 12px;
+      font-size: 36px;
+      padding: 35px 70px;
+      margin: 20px;
+      border-radius: 18px;
       border: none;
       cursor: pointer;
-      transition: 0.2s;
+      transition: transform 0.2s;
     }
+    button:hover { transform: scale(1.05); }
     .a { background: #007aff; color: white; }
     .b { background: #ff3b30; color: white; }
-    .reset { background: #555; color: white; margin-top: 20px; }
-    #resultado {
-      font-size: 28px;
+    .reset { background: #555; color: white; margin-top: 20px; font-size: 20px; padding: 10px 20px; }
+
+    /* Card Resultado */
+    #card {
+      display: none;
       margin-top: 30px;
+      padding: 20px 40px;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      font-size: 22px;
+      text-align: center;
     }
+    #card.certo { border-left: 8px solid #34c759; }
+    #card.errado { border-left: 8px solid #ff3b30; }
   </style>
 </head>
 <body>
   <h1>Batalha de Botões</h1>
+
+  <!-- Placar -->
+  <div id="placar">
+    <div class="timeA">Time A: <span id="scoreA">0</span></div>
+    <div class="timeB">Time B: <span id="scoreB">0</span></div>
+  </div>
+
+  <!-- Botões -->
   <div>
     <button class="a" id="btnA">Time A</button>
     <button class="b" id="btnB">Time B</button>
   </div>
-  <div id="resultado">Aguardando...</div>
-  <button class="reset" id="resetBtn">Resetar</button>
 
-  <!-- Importa o script -->
+  <!-- Card de Resultado -->
+  <div id="card"></div>
+
+  <!-- Botão reset -->
+  <button class="reset" id="resetBtn">Reiniciar Jogo</button>
+
+  <!-- Script -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
