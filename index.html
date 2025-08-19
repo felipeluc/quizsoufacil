@@ -2,27 +2,72 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Buzzer Online</title>
+<title>Buzzer Tablet</title>
 <style>
-body { text-align: center; font-family: Arial; margin-top: 50px; }
-button { font-size: 24px; padding: 20px 40px; margin: 10px; cursor: pointer; }
-#resultado { font-size: 32px; margin-top: 30px; color: green; }
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.half {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+}
+
+#timeA { background-color: #1E90FF; } /* azul */
+#timeB { background-color: #FF4136; } /* vermelho */
+
+#resultado {
+  position: absolute;
+  top: 10%;
+  width: 100%;
+  text-align: center;
+  font-size: 36px;
+  color: green;
+  z-index: 10;
+}
+
+#reset {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  padding: 15px 40px;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
 
-<h1>Buzzer - Jogo de Perguntas</h1>
-
-<button onclick="clicar('Time A')">Time A</button>
-<button onclick="clicar('Time B')">Time B</button>
-<button onclick="resetar()">Reset</button>
-
 <div id="resultado">Quem clicou primeiro?</div>
 
+<div class="container">
+  <div id="timeA" class="half" onclick="clicar('Time A')">TIME A</div>
+  <div id="timeB" class="half" onclick="clicar('Time B')">TIME B</div>
+</div>
+
+<button id="reset" onclick="resetar()">RESET</button>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
+// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyA_3nIU2oEKhxOXvDfmdkKmE93awY08IsI",
   authDomain: "quizsoufacil.firebaseapp.com",
@@ -37,6 +82,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const resultado = document.getElementById("resultado");
 
+// Função quando time clica
 function clicar(time) {
   db.ref("vencedor").get().then(snapshot => {
     if (!snapshot.exists() || snapshot.val() === null) {
@@ -45,10 +91,12 @@ function clicar(time) {
   });
 }
 
+// Reset
 function resetar() {
   db.ref("vencedor").set(null);
 }
 
+// Atualizar em tempo real
 db.ref("vencedor").on("value", snapshot => {
   const v = snapshot.val();
   resultado.textContent = v ? `${v} clicou primeiro!` : "Quem clicou primeiro?";
