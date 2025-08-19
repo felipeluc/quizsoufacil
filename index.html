@@ -1,107 +1,47 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Buzzer Tablet</title>
-<style>
-html, body {
-  height: 100%;
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
-
-.container {
-  display: flex;
-  height: 100%;
-  width: 100%;
-}
-
-.half {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 48px;
-  color: white;
-  cursor: pointer;
-  user-select: none;
-}
-
-#timeA { background-color: #1E90FF; } /* azul */
-#timeB { background-color: #FF4136; } /* vermelho */
-
-#resultado {
-  position: absolute;
-  top: 10%;
-  width: 100%;
-  text-align: center;
-  font-size: 36px;
-  color: green;
-  z-index: 10;
-}
-
-#reset {
-  position: absolute;
-  bottom: 5%;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 28px;
-  padding: 15px 40px;
-  cursor: pointer;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Quiz SouFácil</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f5f5f7;
+    }
+    h1 { margin-bottom: 20px; }
+    button {
+      font-size: 24px;
+      padding: 20px 40px;
+      margin: 10px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .a { background: #007aff; color: white; }
+    .b { background: #ff3b30; color: white; }
+    .reset { background: #555; color: white; margin-top: 20px; }
+    #resultado {
+      font-size: 28px;
+      margin-top: 30px;
+    }
+  </style>
 </head>
 <body>
+  <h1>Batalha de Botões</h1>
+  <div>
+    <button class="a" id="btnA">Time A</button>
+    <button class="b" id="btnB">Time B</button>
+  </div>
+  <div id="resultado">Aguardando...</div>
+  <button class="reset" id="resetBtn">Resetar</button>
 
-<div id="resultado">Quem clicou primeiro?</div>
-
-<div class="container">
-  <div id="timeA" class="half" onclick="clicar('Time A')">TIME A</div>
-  <div id="timeB" class="half" onclick="clicar('Time B')">TIME B</div>
-</div>
-
-<button id="reset" onclick="resetar()">RESET</button>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
-<script>
-// Configuração do Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyA_3nIU2oEKhxOXvDfmdkKmE93awY08IsI",
-  authDomain: "quizsoufacil.firebaseapp.com",
-  databaseURL: "https://quizsoufacil-default-rtdb.firebaseio.com",
-  projectId: "quizsoufacil",
-  storageBucket: "quizsoufacil.appspot.com",
-  messagingSenderId: "83352047783",
-  appId: "1:83352047783:web:bea92a9debdb2146d5cb82"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const resultado = document.getElementById("resultado");
-
-// Função quando time clica
-function clicar(time) {
-  db.ref("vencedor").get().then(snapshot => {
-    if (!snapshot.exists() || snapshot.val() === null) {
-      db.ref("vencedor").set(time);
-    }
-  });
-}
-
-// Reset
-function resetar() {
-  db.ref("vencedor").set(null);
-}
-
-// Atualizar em tempo real
-db.ref("vencedor").on("value", snapshot => {
-  const v = snapshot.val();
-  resultado.textContent = v ? `${v} clicou primeiro!` : "Quem clicou primeiro?";
-});
-</script>
-
+  <!-- Importa o script -->
+  <script type="module" src="script.js"></script>
 </body>
 </html>
