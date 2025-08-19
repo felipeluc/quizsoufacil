@@ -2,43 +2,56 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Buzzer de Equipes</title>
+<title>Buzzer Online</title>
 <style>
-  body { text-align: center; font-family: Arial, sans-serif; margin-top: 50px; }
-  button { font-size: 24px; padding: 20px 40px; margin: 10px; }
-  #resultado { font-size: 32px; margin-top: 30px; color: green; }
+body { text-align: center; font-family: Arial; margin-top: 50px; }
+button { font-size: 24px; padding: 20px 40px; margin: 10px; cursor: pointer; }
+#resultado { font-size: 32px; margin-top: 30px; color: green; }
 </style>
 </head>
 <body>
 
-<h1>Jogo de Perguntas - Buzzer</h1>
+<h1>Buzzer - Jogo de Perguntas</h1>
 
-<button id="timeA">Time A</button>
-<button id="timeB">Time B</button>
-<button id="reset">Reset</button>
+<button onclick="clicar('Time A')">Time A</button>
+<button onclick="clicar('Time B')">Time B</button>
+<button onclick="resetar()">Reset</button>
 
 <div id="resultado">Quem clicou primeiro?</div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
 <script>
-let vencedor = null;
+const firebaseConfig = {
+  apiKey: "AIzaSyA_3nIU2oEKhxOXvDfmdkKmE93awY08IsI",
+  authDomain: "quizsoufacil.firebaseapp.com",
+  databaseURL: "https://quizsoufacil-default-rtdb.firebaseio.com",
+  projectId: "quizsoufacil",
+  storageBucket: "quizsoufacil.appspot.com",
+  messagingSenderId: "83352047783",
+  appId: "1:83352047783:web:bea92a9debdb2146d5cb82"
+};
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 const resultado = document.getElementById("resultado");
-const botaoA = document.getElementById("timeA");
-const botaoB = document.getElementById("timeB");
-const botaoReset = document.getElementById("reset");
 
-function clicarTime(time) {
-  if (!vencedor) {
-    vencedor = time;
-    resultado.textContent = `${time} clicou primeiro!`;
-  }
+function clicar(time) {
+  db.ref("vencedor").get().then(snapshot => {
+    if (!snapshot.exists() || snapshot.val() === null) {
+      db.ref("vencedor").set(time);
+    }
+  });
 }
 
-botaoA.addEventListener("click", () => clicarTime("Time A"));
-botaoB.addEventListener("click", () => clicarTime("Time B"));
-botaoReset.addEventListener("click", () => {
-  vencedor = null;
-  resultado.textContent = "Quem clicou primeiro?";
+function resetar() {
+  db.ref("vencedor").set(null);
+}
+
+db.ref("vencedor").on("value", snapshot => {
+  const v = snapshot.val();
+  resultado.textContent = v ? `${v} clicou primeiro!` : "Quem clicou primeiro?";
 });
 </script>
 
