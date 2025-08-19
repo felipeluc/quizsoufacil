@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SouFácil Quiz – estilo Kahoot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--ok:#16a34a;--warn:#ea580c;--bad:#ef4444;--brand:#38bdf8}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(120deg,#0b1023,#0f172a);color:#e5e7eb}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    .card{background:#0b1222;border:1px solid rgba(148,163,184,.15);box-shadow:0 10px 30px rgba(0,0,0,.35);border-radius:18px;padding:20px}
+    .row{display:flex;gap:16px;flex-wrap:wrap}
+    .col{flex:1 1 320px}
+    h1{font-size:28px;margin:0 0 8px;display:flex;align-items:center;gap:10px}
+    h2{font-size:20px;margin:14px 0}
+    .muted{color:var(--muted)}
+    .btn{border:0;background:var(--brand);color:#001018;padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:700}
+    .btn.secondary{background:#1f2937;color:#e5e7eb;border:1px solid rgba(148,163,184,.2)}
+    .btn.danger{background:var(--bad);color:white}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    input,select,textarea{width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(148,163,184,.25);background:#0a1222;color:#e5e7eb}
+    textarea{min-height:200px;resize:vertical}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#0b2137;border:1px solid rgba(148,163,184,.15);color:#93c5fd;font-weight:700;font-size:12px}
+    .options{display:grid;grid-template-columns:repeat(2,minmax(200px,1fr));gap:12px;margin-top:10px}
+    .option{padding:14px;border-radius:14px;border:1px solid rgba(148,163,184,.25);background:#0b1529;cursor:pointer}
+    .option.correct{outline:2px solid var(--ok)}.option.wrong{outline:2px solid var(--bad)}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .center{display:flex;align-items:center;justify-content:center}
+    .kbd{background:#0f172a;border:1px solid rgba(148,163,184,.25);padding:2px 6px;border-radius:6px;font-family:monospace}
+    .grid{display:grid;gap:12px}
+    .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+    .leader{display:grid;grid-template-columns:40px 1fr 120px;gap:8px;align-items:center;padding:10px;border-radius:12px;border:1px solid rgba(148,163,184,.2);background:#0b1426}
+    .separator{height:1px;background:rgba(148,163,184,.15);margin:10px 0}
+    .tag{padding:6px 10px;border-radius:10px;border:1px solid rgba(148,163,184,.25);background:#0b2137;color:#93c5fd;font-weight:600}
+    .ml8{margin-left:8px}
+    .hidden{display:none}
+    .timer{height:12px;background:#1f2937;border-radius:999px;overflow:hidden}
+    .timer>div{height:100%;background:linear-gradient(90deg,#22d3ee,#60a5fa);width:0%}
+    .foot{margin-top:18px;font-size:12px;color:var(--muted)}
+    .code{white-space:pre-wrap;background:#0b1426;border:1px solid rgba(148,163,184,.2);padding:10px;border-radius:12px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>⚡ SouFácil Quiz <span class="pill">estilo Kahoot</span></h1>
+      <div class="muted">Hospede este arquivo em qualquer servidor estático (ou abra localmente) e conecte ao Firebase para jogar em tempo real.</div>
+
+      <div class="separator"></div>
+
+      <div id="view-select" class="row">
+        <div class="col">
+          <div class="stack">
+            <h2>🎛️ Modo Apresentador (Host)</h2>
+            <div class="muted">Cole o texto das suas 80 perguntas (no mesmo formato que você enviou) e clique em <b>Preparar Quiz</b>. Depois, crie a sala e compartilhe o código.</div>
+            <textarea id="rawInput" placeholder="Cole aqui as 80 perguntas no formato com A)/B)/C)/D) e marcações de correta/✅..."></textarea>
+            <div class="grid cols-2">
+              <div>
+                <label class="muted">Duração por questão (segundos)</label>
+                <input id="qDuration" type="number" min="5" max="120" value="30" />
+              </div>
+              <div>
+                <label class="muted">Pontos base por acerto</label>
+                <input id="baseScore" type="number" min="100" max="5000" value="1000" />
+              </div>
+            </div>
+            <div class="row">
+              <button class="btn" id="btnParse">Preparar Quiz</button>
+              <button class="btn secondary" id="btnDownloadJson" disabled>Baixar JSON</button>
+            </div>
+            <div id="parseInfo" class="muted"></div>
+
+            <h2>🗝️ Criar sala</h2>
+            <div class="grid cols-2">
+              <div>
+                <label class="muted">Código da sala</label>
+                <input id="roomCode" placeholder="ex.: SF1234" />
+              </div>
+              <div>
+                <label class="muted">Seu nome (host)</label>
+                <input id="hostName" placeholder="ex.: Felipe" />
+              </div>
+            </div>
+            <div class="stack">
+              <details class="card">
+                <summary><b>⚙️ Config do Firebase (obrigatório)</b> — clique para abrir</summary>
+                <div class="muted">Crie um projeto Firebase e habilite <b>Firestore</b> (regras em modo teste para brincar). Cole abaixo sua config:</div>
+                <div class="grid cols-2">
+                  <input id="fbApiKey" placeholder="apiKey" />
+                  <input id="fbAuthDomain" placeholder="authDomain" />
+                  <input id="fbProjectId" placeholder="projectId" />
+                  <input id="fbStorageBucket" placeholder="storageBucket (opcional)" />
+                  <input id="fbMessagingSenderId" placeholder="messagingSenderId (opcional)" />
+                  <input id="fbAppId" placeholder="appId" />
+                </div>
+                <div class="foot">Dica: pegue esses dados em <span class="kbd">Configurações do projeto → Seus apps → SDK de configuração</span>.</div>
+              </details>
+            </div>
+            <div class="row">
+              <button class="btn" id="btnInitHost" disabled>Conectar Firebase</button>
+              <button class="btn" id="btnCreateRoom" disabled>Criar sala</button>
+            </div>
+
+            <div id="hostPanel" class="hidden">
+              <div class="separator"></div>
+              <h2>🎤 Painel do Host</h2>
+              <div class="muted">Sala: <b id="lblRoom"></b> • Jogadores: <b id="lblPlayers">0</b></div>
+              <div class="row" style="margin-top:10px">
+                <button class="btn" id="btnStart">Iniciar jogo</button>
+                <button class="btn secondary" id="btnNext" disabled>Próxima pergunta</button>
+                <button class="btn danger" id="btnEnd" disabled>Encerrar</button>
+              </div>
+              <div style="margin-top:10px" id="liveQuestion"></div>
+              <div id="liveStats" class="muted"></div>
+              <div id="hostLeaderboard" style="margin-top:12px"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="stack">
+            <h2>🧑‍🤝‍🧑 Modo Jogador</h2>
+            <div class="grid cols-2">
+              <input id="joinRoom" placeholder="Código da sala" />
+              <input id="playerName" placeholder="Seu nome" />
+            </div>
+            <div class="row">
+              <button class="btn" id="btnInitPlayer">Conectar Firebase</button>
+              <button class="btn" id="btnJoin" disabled>Entrar</button>
+            </div>
+            <div class="card" id="playerArea" style="margin-top:10px">
+              <div id="phaseLobby" class="">Aguardando entrada…</div>
+              <div id="phaseQuestion" class="hidden"></div>
+              <div id="phaseFeedback" class="hidden"></div>
+              <div id="phaseEnd" class="hidden"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+      <div class="foot">Feito para a SouFácil. Pontuação: acerto = base + bônus de velocidade. Bônus proporcional ao tempo restante.</div>
+    </div>
+  </div>
+
+  <!-- Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Estado global simples
+    const state = {
+      fb:null, db:null, role:null,
+      questions: [],
+      duration:30, base:1000,
+      room:null, hostId:null, playerId:null,
+      unsubRoom:null, unsubPlayers:null
+    };
+
+    // Utils
+    const $ = (s)=>document.querySelector(s);
+    const el = (tag, attrs={}, children=[])=>{const e=document.createElement(tag);for(const k in attrs){if(k==='class')e.className=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}children.forEach(c=>e.appendChild(c));return e};
+    const uid = ()=>Math.random().toString(36).slice(2,10);
+
+    // Parser para o formato enviado pelo usuário (marcações "- correta" ou "✅")
+    function parseQuestions(raw){
+      const lines = raw.split(/\r?\n/);
+      const out = [];
+      let curQ = null;
+      const isQuestion = (t)=>/^(###\s*\d+\.|\d+\.)\s|^###\s/.test(t);
+      for(let ln of lines){
+        let t = ln.trim();
+        if(!t) continue;
+        // Remover marcadores ---
+        if(/^[-]{3,}$/.test(t)) continue;
+        // Detecta pergunta
+        if(isQuestion(t)){
+          if(curQ && curQ.options?.length){ out.push(curQ); }
+          // Remove prefixos tipo "### 1." ou "1."
+          t = t.replace(/^###\s*/,'').replace(/^\d+\.?\s*/,'');
+          curQ = { question:t, options:[], correctIndex:null };
+          continue;
+        }
+        // Detecta alternativas: A)/B)/C)/D) ou a)/b)/c)/d)
+        const m = t.match(/^([A-Da-d])\)\s*(.*)$/) || t.match(/^([a-d])\)\s*(.*)$/);
+        if(m && curQ){
+          let text = m[2].trim();
+          let correct = false;
+          if(/\bcorreta\b/i.test(text) || /✅/.test(text)) { correct = true; text = text.replace(/-\s*correta/i,'').replace(/✅/g,'').trim(); }
+          curQ.options.push(text);
+          if(correct) curQ.correctIndex = curQ.options.length-1;
+          continue;
+        }
+      }
+      if(curQ && curQ.options?.length) out.push(curQ);
+      // Filtra somente perguntas válidas (4 opções)
+      const valid = out.filter(q=>q.options.length>=2);
+      return valid;
+    }
+
+    function renderLeaderboard(list){
+      const wrap = el('div');
+      list.slice(0,10).forEach((p,i)=>{
+        wrap.appendChild(el('div',{class:'leader'},[
+          el('div',{class:'pill',html:'#'+(i+1)}),
+          el('div',{html:`<b>${p.name}</b>`}),
+          el('div',{class:'tag',html:`${p.score} pts`}),
+        ]));
+      });
+      return wrap;
+    }
+
+    // Firebase helpers
+    function initFirebaseFromInputs(){
+      const cfg = {
+        apiKey: $('#fbApiKey').value.trim(),
+        authDomain: $('#fbAuthDomain').value.trim(),
+        projectId: $('#fbProjectId').value.trim(),
+        storageBucket: $('#fbStorageBucket').value.trim()||undefined,
+        messagingSenderId: $('#fbMessagingSenderId').value.trim()||undefined,
+        appId: $('#fbAppId').value.trim(),
+      };
+      if(!cfg.apiKey || !cfg.projectId || !cfg.appId) {
+        alert('Preencha apiKey, projectId e appId.');
+        return;
+      }
+      state.fb = firebase.initializeApp(cfg);
+      state.db = firebase.firestore();
+      return true;
+    }
+
+    // HOST FLOW
+    $('#btnParse').onclick = ()=>{
+      const raw = $('#rawInput').value;
+      state.duration = Math.max(5, parseInt($('#qDuration').value||30));
+      state.base = Math.max(100, parseInt($('#baseScore').value||1000));
+      const qs = parseQuestions(raw);
+      state.questions = qs;
+      $('#parseInfo').innerHTML = qs.length
+        ? `✅ ${qs.length} perguntas preparadas. Duração ${state.duration}s · Base ${state.base} pts.`
+        : '⚠️ Não encontrei perguntas. Confira o formato (A)/B)/C)/D) e marcação "- correta"/✅.';
+      $('#btnDownloadJson').disabled = qs.length===0;
+      $('#btnInitHost').disabled = false;
+    };
+
+    $('#btnDownloadJson').onclick = ()=>{
+      const blob = new Blob([JSON.stringify(state.questions,null,2)],{type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'soufacil_quiz_perguntas.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+
+    $('#btnInitHost').onclick = ()=>{
+      if(!initFirebaseFromInputs()) return;
+      state.role = 'host';
+      $('#btnCreateRoom').disabled = false;
+      alert('Firebase conectado (host).');
+    };
+
+    async function createRoom(){
+      const code = ($('#roomCode').value||'').trim().toUpperCase() || ('SF'+Math.random().toString(36).slice(2,7)).toUpperCase();
+      const hostName = ($('#hostName').value||'Host').trim();
+      if(state.questions.length===0) return alert('Prepare o quiz primeiro.');
+      const ref = state.db.collection('rooms').doc(code);
+      const data = {
+        createdAt: Date.now(), status:'lobby',
+        currentIndex: -1, duration: state.duration, base: state.base,
+        qCount: state.questions.length, hostName, startedAt:null
+      };
+      await ref.set(data);
+      // guarda perguntas em subcoleção (evita payload gigante no doc principal)
+      const batch = state.db.batch();
+      state.questions.forEach((q,idx)=>{
+        const qRef = ref.collection('questions').doc(String(idx));
+        batch.set(qRef,q);
+      });
+      await batch.commit();
+      state.room = code; state.hostId = uid();
+      $('#lblRoom').textContent = code;
+      $('#hostPanel').classList.remove('hidden');
+      subscribeRoomForHost(code);
+      subscribePlayers(code);
+      $('#btnStart').disabled = false;
+      $('#btnNext').disabled = true;
+      $('#btnEnd').disabled = false;
+      $('#btnCreateRoom').disabled = true;
+      alert('Sala criada: '+code+' — compartilhe com os jogadores.');
+    }
+
+    $('#btnCreateRoom').onclick = createRoom;
+
+    function subscribeRoomForHost(code){
+      if(state.unsubRoom) state.unsubRoom();
+      state.unsubRoom = state.db.collection('rooms').doc(code)
+        .onSnapshot(async snap=>{
+          const r = snap.data(); if(!r) return;
+          const qWrap = $('#liveQuestion'); qWrap.innerHTML = '';
+          if(r.currentIndex>=0){
+            const qDoc = await snap.ref.collection('questions').doc(String(r.currentIndex)).get();
+            const q = qDoc.data();
+            qWrap.appendChild(el('div',{html:`<div class="pill">Pergunta ${r.currentIndex+1}/${r.qCount}</div><h2>${q.question}</h2>`}));
+            const stats = await snap.ref.collection('players').get();
+            const total = stats.size;
+            const answered = stats.docs.filter(d=> (d.data().lastIndex===r.currentIndex)).length;
+            $('#liveStats').innerHTML = `Respondidas: <b>${answered}</b> / ${total}`;
+          } else {
+            $('#liveStats').innerHTML = 'Sala no lobby.';
+          }
+        });
+    }
+
+    function subscribePlayers(code){
+      if(state.unsubPlayers) state.unsubPlayers();
+      state.unsubPlayers = state.db.collection('rooms').doc(code).collection('players')
+        .orderBy('score','desc').onSnapshot(snap=>{
+          const arr = snap.docs.map(d=>d.data());
+          $('#lblPlayers').textContent = arr.length;
+          const hostLb = $('#hostLeaderboard'); hostLb.innerHTML='';
+          hostLb.appendChild(renderLeaderboard(arr));
+        });
+    }
+
+    async function pushQuestion(idx){
+      const ref = state.db.collection('rooms').doc(state.room);
+      const now = Date.now();
+      await ref.update({ currentIndex: idx, status:'question', startedAt: now });
+    }
+
+    $('#btnStart').onclick = ()=> pushQuestion(0);
+    $('#btnNext').onclick = async ()=>{
+      const ref = state.db.collection('rooms').doc(state.room);
+      const snap = await ref.get(); const r = snap.data();
+      const next = r.currentIndex + 1;
+      if(next < r.qCount) await pushQuestion(next); else { await ref.update({status:'ended'}); }
+    };
+    $('#btnEnd').onclick = async ()=>{
+      if(!confirm('Encerrar a sala?')) return;
+      await state.db.collection('rooms').doc(state.room).update({status:'ended'});
+    };
+
+    // PLAYER FLOW
+    $('#btnInitPlayer').onclick = ()=>{
+      if(!initFirebaseFromInputs()) return;
+      state.role = 'player';
+      $('#btnJoin').disabled = false;
+      alert('Firebase conectado (jogador).');
+    };
+
+    async function joinRoom(){
+      const code = ($('#joinRoom').value||'').trim().toUpperCase();
+      const name = ($('#playerName').value||'').trim() || 'Jogador';
+      if(!code) return alert('Digite o código da sala.');
+      const roomRef = state.db.collection('rooms').doc(code);
+      const roomSnap = await roomRef.get();
+      if(!roomSnap.exists) return alert('Sala não encontrada.');
+      state.room = code; state.playerId = uid();
+      await roomRef.collection('players').doc(state.playerId).set({
+        id: state.playerId, name, score:0, lastIndex:-1, correct:false, answeredAt:null, joinedAt: Date.now()
+      });
+      watchRoomAsPlayer();
+      $('#phaseLobby').innerHTML = `Conectado à sala <b>${code}</b>. Aguarde o apresentador iniciar.`;
+      $('#btnJoin').disabled = true;
+    }
+    $('#btnJoin').onclick = joinRoom;
+
+    function setView(id){
+      ['phaseLobby','phaseQuestion','phaseFeedback','phaseEnd'].forEach(v=>{
+        const elv = document.getElementById(v); if(elv) elv.classList.add('hidden');
+      });
+      const tgt = document.getElementById(id); if(tgt) tgt.classList.remove('hidden');
+    }
+
+    function renderTimer(msLeft, total){
+      const pct = Math.max(0, Math.min(100, (msLeft/total)*100));
+      return `<div class="timer"><div style="width:${pct}%"></div></div>`;
+    }
+
+    function watchRoomAsPlayer(){
+      const rRef = state.db.collection('rooms').doc(state.room);
+      if(state.unsubRoom) state.unsubRoom();
+      state.unsubRoom = rRef.onSnapshot(async snap=>{
+        const r = snap.data(); if(!r) return;
+        if(r.status==='lobby'){ setView('phaseLobby'); return; }
+        if(r.status==='ended'){ setView('phaseEnd'); $('#phaseEnd').innerHTML = '<h2>Jogo encerrado</h2>'; return; }
+        // Question phase
+        const qRef = rRef.collection('questions').doc(String(r.currentIndex));
+        const qDoc = await qRef.get(); const q = qDoc.data();
+        const dur = (r.duration||30)*1000;
+        const endAt = (r.startedAt||Date.now()) + dur;
+
+        // Render pergunta
+        setView('phaseQuestion');
+        const wrap = $('#phaseQuestion');
+        const answered = window.localStorage.getItem('ans-'+state.room+'-'+r.currentIndex) === '1';
+        const now = Date.now();
+        const msLeft = endAt - now;
+        wrap.innerHTML = `<div class="pill">Pergunta ${r.currentIndex+1}/${r.qCount}</div>
+          <h2>${q.question}</h2>
+          <div id="timerWrap">${renderTimer(msLeft, dur)}</div>
+          <div class="options">
+            ${q.options.map((op,i)=>`<div class="option" data-i="${i}">${op}</div>`).join('')}
+          </div>
+          <div class="foot">Dica: você só pode responder uma vez.</div>`;
+
+        const optEls = wrap.querySelectorAll('.option');
+        optEls.forEach(e=>e.onclick = async ()=>{
+          if(answered) return;
+          const i = parseInt(e.getAttribute('data-i'));
+          const now = Date.now();
+          const inTime = now < endAt;
+          let score = 0; let correct=false;
+          if(inTime && i === q.correctIndex){
+            const remain = endAt - now; const bonus = Math.max(0, Math.floor((remain/dur) * (r.base||1000)*0.5));
+            score = (r.base||1000) + bonus; correct=true;
+          }
+          await rRef.collection('players').doc(state.playerId).set({
+            lastIndex: r.currentIndex, answeredAt: now, correct, score: firebase.firestore.FieldValue.increment(score)
+          }, {merge:true});
+          window.localStorage.setItem('ans-'+state.room+'-'+r.currentIndex,'1');
+          // feedback
+          setView('phaseFeedback');
+          $('#phaseFeedback').innerHTML = `<h2>${correct? '✅ Acertou!':'❌ Errou'}</h2>
+            <div class="muted">${correct? ('+'+score+' pts') : 'Tente a próxima'}</div>`;
+        });
+
+        // Timer progress animation
+        const tEl = document.getElementById('timerWrap');
+        const tick = ()=>{
+          const ms = endAt - Date.now();
+          tEl.innerHTML = renderTimer(ms, dur);
+          if(ms>0) requestAnimationFrame(tick);
+          else $('#phaseFeedback').classList.remove('hidden');
+        };
+        requestAnimationFrame(tick);
+      });
+    }
+
+    // Host: transições e controles
+    setInterval(async ()=>{
+      if(state.role!== 'host' || !state.room) return;
+      const ref = state.db.collection('rooms').doc(state.room);
+      const snap = await ref.get(); if(!snap.exists) return;
+      const r = snap.data();
+      if(r.status==='question'){
+        // habilita botão Próxima quando 100% respondeu ou tempo acabou
+        const dur = (r.duration||30)*1000; const endAt = (r.startedAt||0)+dur;
+        const now = Date.now();
+        const pSnap = await ref.collection('players').get();
+        const total = pSnap.size;
+        const answered = pSnap.docs.filter(d=> d.data().lastIndex===r.currentIndex).length;
+        $('#btnNext').disabled = (now < endAt) && (answered < total && total>0);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
