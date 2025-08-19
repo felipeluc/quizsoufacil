@@ -1,8 +1,7 @@
-// === Importa Firebase ===
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-// Configuração Firebase
+// Config Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyA_3nIU2oEKhxOXvDfmdkKmE93awY08IsI",
   authDomain: "quizsoufacil.firebaseapp.com",
@@ -16,21 +15,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// === Referência no Firestore ===
+// Referência do documento
 const gameRef = doc(db, "game", "status");
 
-// === Elementos da tela ===
+// Elementos HTML
 const btnA = document.getElementById("btnA");
 const btnB = document.getElementById("btnB");
-const placarA = document.getElementById("placarA");
-const placarB = document.getElementById("placarB");
+const placarA = document.getElementById("scoreA");
+const placarB = document.getElementById("scoreB");
 const card = document.getElementById("card");
-const cardText = document.getElementById("cardText");
-const certoBtn = document.getElementById("certoBtn");
-const erradoBtn = document.getElementById("erradoBtn");
-const restartBtn = document.getElementById("restartBtn");
+const cardText = document.getElementById("mensagem");
+const certoBtn = document.getElementById("certo");
+const erradoBtn = document.getElementById("errado");
+const restartBtn = document.getElementById("reiniciar");
 
-// === Inicializar jogo no Firestore ===
+// Inicializa jogo no Firestore se não existir
 async function initGame() {
   const snap = await getDoc(gameRef);
   if (!snap.exists()) {
@@ -43,57 +42,52 @@ async function initGame() {
 }
 initGame();
 
-// === Botões de clique (Time A / B) ===
-btnA.addEventListener("click", async () => {
-  const snap = await getDoc(gameRef);
-  if (!snap.data().ultimo) {
-    await updateDoc(gameRef, { ultimo: "A" });
-  }
-});
-
-btnB.addEventListener("click", async () => {
-  const snap = await getDoc(gameRef);
-  if (!snap.data().ultimo) {
-    await updateDoc(gameRef, { ultimo: "B" });
-  }
-});
-
-// === Certo / Errado ===
-certoBtn.addEventListener("click", async () => {
+// Função para registrar clique do Time
+async function registrarClique(time) {
   const snap = await getDoc(gameRef);
   const data = snap.data();
-  if (data.ultimo === "A") {
-    await updateDoc(gameRef, { timeA: data.timeA + 100, ultimo: null });
-  } else if (data.ultimo === "B") {
-    await updateDoc(gameRef, { timeB: data.timeB + 100, ultimo: null });
+  if (!data.ultimo) {
+    await updateDoc(gameRef, { ultimo: time });
   }
-});
+}
 
-erradoBtn.addEventListener("click", async () => {
+// Clique nos botões Time A / B
+btnA.addEventListener("click", () => registrarClique("A"));
+btnB.addEventListener("click", () => registrarClique("B"));
+
+// Função para atualizar pontos
+async function atualizarPontos(correto) {
   const snap = await getDoc(gameRef);
   const data = snap.data();
-  if (data.ultimo === "A") {
-    await updateDoc(gameRef, { timeA: data.timeA - 50, ultimo: null });
-  } else if (data.ultimo === "B") {
-    await updateDoc(gameRef, { timeB: data.timeB - 50, ultimo: null });
-  }
-});
+  if (!data.ultimo) return;
 
-// === Reiniciar Jogo ===
-restartBtn.addEventListener("click", async () => {
+  const campo = data.ultimo === "A" ? "timeA" : "timeB";
+  const novoValor = correto ? data[campo] + 100 : data[campo] - 50;
+
   await updateDoc(gameRef, {
-    timeA: 0,
-    timeB: 0,
+    [campo]: novoValor,
     ultimo: null
   });
+}
+
+// Botões Certo / Errado
+certoBtn.addEventListener("click", () => atualizarPontos(true));
+erradoBtn.addEventListener("click", () => atualizarPontos(false));
+
+// Botão Reiniciar Jogo
+restartBtn.addEventListener("click", async () => {
+  await updateDoc(gameRef, { timeA: 0, timeB: 0, ultimo: null });
 });
 
-// === Escuta alterações em tempo real ===
+// Escuta alterações em tempo real
 onSnapshot(gameRef, (docSnap) => {
   const data = docSnap.data();
+
+  // Atualiza placar
   placarA.textContent = data.timeA;
   placarB.textContent = data.timeB;
 
+  // Exibe card se alguém apertou
   if (data.ultimo) {
     card.style.display = "block";
     cardText.textContent = `Time ${data.ultimo} apertou!`;
