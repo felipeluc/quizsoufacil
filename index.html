@@ -1,337 +1,500 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SouFácil Quiz – Online</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#0b1023;--card:#0f172a;--muted:#94a3b8;--brand:#38bdf8;--ok:#22c55e;--bad:#ef4444}
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:radial-gradient(1200px 600px at 20% -10%,#0c1b3a,transparent),linear-gradient(180deg,#0b1023,#0b1023);color:#e5e7eb}
-    .container{max-width:1100px;margin:0 auto;padding:20px}
-    .card{background:#0f172a;border:1px solid rgba(148,163,184,.15);border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.35);padding:18px}
-    h1{font-size:28px;margin:0 0 8px;display:flex;align-items:center;gap:10px}
-    h2{font-size:20px;margin:12px 0}
-    .muted{color:var(--muted)}
-    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#0b2137;border:1px solid rgba(148,163,184,.15);color:#a5b4fc;font-weight:800;font-size:12px}
-    .row{display:flex;gap:16px;flex-wrap:wrap}
-    .col{flex:1 1 320px}
-    .grid{display:grid;gap:12px}
-    .grid.cols-2{grid-template-columns:repeat(2,1fr)}
-    input,select,button,textarea{font:inherit}
-    input,select,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(148,163,184,.25);background:#0a1222;color:#e5e7eb}
-    textarea{min-height:120px}
-    .btn{border:0;background:var(--brand);color:#001018;padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:800}
-    .btn.secondary{background:#1f2937;color:#e5e7eb;border:1px solid rgba(148,163,184,.2)}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .option{padding:14px;border-radius:14px;border:1px solid rgba(148,163,184,.25);background:#0b1529;cursor:pointer}
-    .option.correct{outline:2px solid var(--ok)}.option.wrong{outline:2px solid var(--bad)}
-    .timer{height:12px;background:#1f2937;border-radius:999px;overflow:hidden}
-    .timer>div{height:100%;background:linear-gradient(90deg,#22d3ee,#60a5fa);width:0%}
-    .leader{display:grid;grid-template-columns:40px 1fr 120px;gap:8px;align-items:center;padding:10px;border-radius:12px;border:1px solid rgba(148,163,184,.2);background:#0b1426}
-    .separator{height:1px;background:rgba(148,163,184,.15);margin:12px 0}
-    .hidden{display:none}
-    .center{display:flex;align-items:center;justify-content:center}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SouFácil Quiz — Online (20s)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#071127;--card:#0f1624;--muted:#9aa9bf;--brand:#36bdf0;--ok:#22c55e;--bad:#ef4444}
+  *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#061025,#071127);color:#e6eef8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+  .wrap{max-width:1000px;width:100%;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent);border-radius:14px;padding:18px;border:1px solid rgba(255,255,255,.03)}
+  h1{margin:0 0 6px;font-size:20px;display:flex;gap:10px;align-items:center}
+  .muted{color:var(--muted);font-size:13px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .col{flex:1 1 320px}
+  input,button,select,textarea{font:inherit}
+  input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.04);background:transparent;color:inherit}
+  .btn{background:var(--brand);color:#001018;padding:10px 12px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+  .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,.06);color:inherit}
+  .card{background:rgba(255,255,255,.02);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,.02)}
+  .options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+  .option{padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.03);background:transparent;cursor:pointer}
+  .option.disabled{opacity:.5;pointer-events:none}
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03);font-weight:700}
+  .timer{height:10px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;margin-top:8px}
+  .timer>div{height:100%;background:linear-gradient(90deg,#36bdf0,#6ea8ff);width:0%}
+  .list{margin-top:10px;max-height:160px;overflow:auto}
+  .lc{display:flex;justify-content:space-between;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.02);margin-bottom:6px}
+  .center{display:flex;align-items:center;justify-content:center}
+  .hidden{display:none}
+  .small{font-size:13px;color:var(--muted)}
+  footer{margin-top:10px;font-size:12px;color:var(--muted)}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>⚡ SouFácil Quiz <span class="pill">online (Firebase)</span></h1>
-      <div class="muted">Abra este arquivo e compartilhe o código da sala para os jogadores entrarem do celular.</div>
-      <div class="separator"></div>
+  <div class="wrap">
+    <h1>⚡ SouFácil Quiz — 20s por pergunta <span class="pill">Modo livre</span></h1>
+    <div class="muted">Abra este arquivo num servidor (ou local) e compartilhe o link. Todos entram com o nome e qualquer um pode iniciar o jogo.</div>
+    <div style="height:12px"></div>
 
-      <div class="row">
-        <div class="col">
-          <h2>🎤 Modo Apresentador (Host)</h2>
-          <div class="grid cols-2">
-            <div>
-              <label class="muted">Código da sala</label>
-              <input id="roomCode" placeholder="ex.: SF1234" />
-            </div>
-            <div>
-              <label class="muted">Seu nome</label>
-              <input id="hostName" placeholder="ex.: Host" />
-            </div>
-          </div>
-          <div class="grid cols-2" style="margin-top:8px">
-            <div>
-              <label class="muted">Duração por pergunta (s)</label>
-              <input id="qDuration" type="number" min="5" max="120" value="30" />
-            </div>
-            <div>
-              <label class="muted">Pontos base por acerto</label>
-              <input id="baseScore" type="number" min="100" max="5000" value="1000" />
-            </div>
-          </div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="btnInitHost">Conectar & Criar sala</button>
-            <button class="btn secondary" id="btnStart" disabled>Iniciar jogo</button>
-            <button class="btn secondary" id="btnNext" disabled>Próxima</button>
-            <button class="btn secondary" id="btnEnd" disabled>Encerrar</button>
-          </div>
-          <div id="hostInfo" class="muted" style="margin-top:8px"></div>
-          <div class="separator"></div>
-          <div id="liveQuestion"></div>
-          <div id="liveStats" class="muted"></div>
-          <div id="hostLeaderboard" style="margin-top:12px"></div>
+    <div class="row">
+      <div class="col card">
+        <h2 style="margin:0;font-size:16px">Entrar / Sala</h2>
+        <div style="height:8px"></div>
+        <label class="small">Código da sala (qualquer texto)</label>
+        <input id="roomInput" placeholder="ex: SOUFACIL01"/>
+        <div style="height:6px"></div>
+        <label class="small">Seu nome</label>
+        <input id="nameInput" placeholder="ex: Maria"/>
+        <div style="height:8px"></div>
+        <div class="row">
+          <button class="btn" id="btnJoin">Entrar na sala</button>
+          <button class="btn secondary" id="btnStart" disabled>Iniciar (apenas um clique)</button>
         </div>
-        <div class="col">
-          <h2>🧑‍🤝‍🧑 Modo Jogador</h2>
-          <div class="grid cols-2">
-            <input id="joinRoom" placeholder="Código da sala" />
-            <input id="playerName" placeholder="Seu nome" />
-          </div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="btnInitPlayer">Conectar</button>
-            <button class="btn secondary" id="btnJoin" disabled>Entrar</button>
-          </div>
-          <div class="card" style="margin-top:10px">
-            <div id="phaseLobby">Aguardando…</div>
-            <div id="phaseQuestion" class="hidden"></div>
-            <div id="phaseFeedback" class="hidden"></div>
-            <div id="phaseEnd" class="hidden"></div>
-          </div>
+        <div style="height:8px"></div>
+        <div id="joinedInfo" class="small">Ainda não entrou em nenhuma sala.</div>
+
+        <div style="height:10px"></div>
+        <div class="separator"></div>
+        <div style="height:8px"></div>
+        <div>
+          <div class="small">Jogadores na sala</div>
+          <div id="playersList" class="list"></div>
         </div>
       </div>
 
-      <div class="separator"></div>
-      <div class="muted">Pontuação: acerto = base + bônus proporcional ao tempo restante.</div>
+      <div class="col card">
+        <h2 style="margin:0;font-size:16px">Pergunta atual</h2>
+        <div id="statusArea" style="margin-top:8px" class="small">Aguardando início...</div>
+
+        <div id="questionArea" class="hidden">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="pill" id="qIndex">Pergunta 1/80</div>
+            <div class="small">Tempo restante: <span id="timeLeft">20</span>s</div>
+          </div>
+
+          <h3 id="qText" style="margin:8px 0 0 0"></h3>
+          <div class="timer"><div id="timerBar" style="width:0%"></div></div>
+          <div class="options" id="optionsWrap"></div>
+
+          <div style="height:10px"></div>
+          <div class="small">Resumo da pergunta (aparece quando o tempo acabar):</div>
+          <div id="summaryArea" class="list small"></div>
+        </div>
+
+        <div id="endArea" class="hidden">
+          <h3>🏁 Jogo finalizado</h3>
+          <div class="small">Ranking final:</div>
+          <div id="finalRanking" class="list"></div>
+          <div style="height:8px"></div>
+          <button class="btn" id="btnRestartLocal">Reiniciar local (mesma sala)</button>
+        </div>
+      </div>
     </div>
+
+    <footer>Observação: para testes, configure o Realtime Database em modo teste no console do Firebase.</footer>
   </div>
 
-  <!-- Firebase compat SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+  <!-- Firebase Realtime Database compat -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <script>
-    // 🔑 Config do seu Firebase (já preenchido)
-    const firebaseConfig = {
-      apiKey: "AIzaSyAns0NBLW8JTmLFRuOSLz16tAXrKuox9rU",
-      authDomain: "comercial-92085.firebaseapp.com",
-      projectId: "comercial-92085",
-      storageBucket: "comercial-92085.firebasestorage.app",
-      messagingSenderId: "1086266528954",
-      appId: "1:1086266528954:web:91dfc7975e79c5cc141e83"
-    };
+  /***** CONFIG (já preenchida com suas chaves) *****/
+  const firebaseConfig = {
+    apiKey: "AIzaSyAns0NBLW8JTmLFRuOSLz16tAXrKuox9rU",
+    authDomain: "comercial-92085.firebaseapp.com",
+    projectId: "comercial-92085",
+    storageBucket: "comercial-92085.firebasestorage.app",
+    messagingSenderId: "1086266528954",
+    appId: "1:1086266528954:web:91dfc7975e79c5cc141e83"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    // 📦 Perguntas embutidas (80)
-    // Formato: {question, options:[A,B,C,D], correctIndex}
-    const BUILTIN_QUESTIONS = [
-      // 1–30 (Simulado Vendedor Externo)
-      {question:"Qual é a postura correta ao chegar em uma loja para a primeira abordagem?", options:["Mexer no celular para parecer ocupado","Chegar sorrindo e mantendo contato visual","Ficar em silêncio até o lojista falar primeiro","Sentar-se sem pedir permissão"], correctIndex:1},
-      {question:"O que é essencial para passar uma boa primeira impressão?", options:["Falar rápido para encurtar a conversa","Ter uniforme limpo e bem passado","Usar acessórios chamativos","Forçar uma venda imediata"], correctIndex:1},
-      {question:"Qual deve ser o tom de voz usado na abordagem?", options:["Alto e autoritário","Claro, audível e modulado","Baixo e quase inaudível","Rápido e apressado"], correctIndex:1},
-      {question:"O que significa escuta ativa?", options:["Interromper o cliente para corrigir","Repetir gírias para criar proximidade","Prestar atenção, confirmar e resumir o que o cliente disse","Deixar o cliente falar sem responder"], correctIndex:2},
-      {question:"Antes da visita, o que NÃO faz parte do planejamento?", options:["Pesquisar sobre o lojista","Preparar material de apoio","Planejar rota","Improvisar totalmente na hora"], correctIndex:3},
-      {question:"Durante a visita, qual é a melhor forma de iniciar a conversa?", options:["Com um quebra-gelo ou elogio sincero","Perguntando direto sobre vendas","Entregando contrato de imediato","Falando mal de concorrentes"], correctIndex:0},
-      {question:"Se o lojista disser ‘já trabalho com outra financeira’, a melhor resposta é:", options:["Então não preciso explicar","Nossos clientes também usavam outras, mas migraram pelos nossos diferenciais","A concorrência é ruim, só nós prestamos","Se mudar de ideia me procure"], correctIndex:1},
-      {question:"Qual item é essencial após a visita?", options:["Esquecer o que foi conversado","Enviar mensagem de agradecimento","Evitar contato para não incomodar","Esperar o cliente ligar"], correctIndex:1},
-      {question:"Qual deve ser o foco principal da apresentação?", options:["Características do produto","Benefícios para o lojista","Falar apenas sobre preço","Criticar concorrentes"], correctIndex:1},
-      {question:"Qual vestimenta é adequada para homens?", options:["Calça rasgada, camiseta colorida","Uniforme bem passado e cores neutras","Boné e chinelo","Roupas informais e chamativas"], correctIndex:1},
-      {question:"Qual vestimenta é adequada para mulheres?", options:["Roupas curtas e coloridas","Uniforme bem passado, cores neutras e cabelo arrumado","Maquiagem exagerada","Sandália de praia"], correctIndex:1},
-      {question:"Se o lojista disser ‘está caro’, qual é a melhor resposta?", options:["Então não compre","Entendo, mas veja o retorno que você terá","É o preço que temos, não tem o que fazer","Se não quiser, eu saio"], correctIndex:1},
-      {question:"O que é recomendado levar sempre na visita?", options:["Material de vendas completo","Apenas celular","Nada, para não parecer insistente","Apenas cartão pessoal"], correctIndex:0},
-      {question:"Qual a melhor postura corporal durante a abordagem?", options:["Braços cruzados","De pé, postura aberta e receptiva","De costas para o lojista","Sempre sentado"], correctIndex:1},
-      {question:"Após o lojista dizer ‘preciso conversar com meu sócio’, o vendedor deve:", options:["Encerrar a visita imediatamente","Oferecer preparar resumo para o sócio","Dizer que não é necessário","Pressionar para decidir sozinho"], correctIndex:1},
-      {question:"Qual a vantagem de usar perguntas abertas?", options:["Fecham a conversa mais rápido","Estimulam o lojista a falar mais","Limitam as respostas a sim/não","Desgastam a paciência do cliente"], correctIndex:1},
-      {question:"O que significa adaptar a linguagem ao perfil do lojista?", options:["Falar difícil para parecer inteligente","Usar sempre gírias","Ajustar vocabulário de acordo com o cliente","Falar apenas sobre preço"], correctIndex:2},
-      {question:"O que deve ser feito logo após sair da loja?", options:["Atualizar lista de visitas e registrar informações","Esquecer para não ocupar memória","Não anotar nada","Esperar a próxima semana para lembrar"], correctIndex:0},
-      {question:"Se o lojista não estiver interessado, a melhor atitude é:", options:["Forçar a venda até ele aceitar","Perguntar o que não interessou e anotar feedback","Encerrar sem agradecer","Deixar de lado e nunca mais voltar"], correctIndex:1},
-      {question:"Qual é um diferencial da SouFacil?", options:["Aprovação sem burocracia","Vendas apenas à vista","Taxa fixa e alta para todos","Não oferecer parcelamento"], correctIndex:0},
-      {question:"O que deve ser feito quando o cliente apresenta uma objeção?", options:["Contradizer imediatamente","Ouvir, validar e responder com benefícios","Interromper para não perder tempo","Mudar de assunto"], correctIndex:1},
-      {question:"Qual deve ser a postura diante de atrasos?", options:["Chegar sem avisar","Sempre respeitar o horário combinado","Avisar que não tem tempo","Cancelar sem justificar"], correctIndex:1},
-      {question:"Como reforçar credibilidade na visita?", options:["Mostrar métricas reais de aumento de vendas","Falar apenas de preço","Prometer o impossível","Evitar responder dúvidas"], correctIndex:0},
-      {question:"Um bom fechamento de visita inclui:", options:["Estabelecer próximos passos concretos","Não marcar nada para não pressionar","Encerrar sem despedida","Deixar o cliente confuso"], correctIndex:0},
-      {question:"Qual deve ser a frequência de contato após a visita?", options:["Nenhum contato para não incomodar","Regular, mas respeitando o tempo do lojista","Ligar todos os dias sem parar","Mandar apenas mensagens de vendas"], correctIndex:1},
-      {question:"O que não deve ser feito ao falar de concorrentes?", options:["Valorizar seus diferenciais","Falar mal e desmerecer","Reconhecer que o cliente já tem parceiro","Mostrar alternativas melhores"], correctIndex:1},
-      {question:"Qual atitude demonstra profissionalismo?", options:["Postura carismática e organizada","Improvisar sempre","Esquecer material de vendas","Vestir roupas informais"], correctIndex:0},
-      {question:"Por que enviar mensagem após a visita?", options:["Para agradecer e reforçar lembrança","Para pressionar o cliente","Para tentar fechar imediatamente","Para encerrar contato"], correctIndex:0},
-      {question:"Em relação ao tempo do lojista, o vendedor deve:", options:["Valorizar cada minuto e ser objetivo","Falar o máximo possível","Esperar até ser ignorado","Interromper constantemente"], correctIndex:0},
-      {question:"Um checklist de vendedor externo ajuda em quê?", options:["Organizar visitas e aumentar produtividade","Tornar o trabalho mais difícil","Diminuir controle de metas","Evitar contato com lojistas"], correctIndex:0},
+  /***** Perguntas embutidas (já todas as 80) *****/
+  // Formato: {question: "...", options: ["A","B","C","D"], correctIndex: n}
+  const QUESTIONS = [
+    {question:"Qual é a postura correta ao chegar em uma loja para a primeira abordagem?", options:["Mexer no celular para parecer ocupado","Chegar sorrindo e mantendo contato visual","Ficar em silêncio até o lojista falar primeiro","Sentar-se sem pedir permissão"], correctIndex:1},
+    {question:"O que é essencial para passar uma boa primeira impressão?", options:["Falar rápido para encurtar a conversa","Ter uniforme limpo e bem passado","Usar acessórios chamativos","Forçar uma venda imediata"], correctIndex:1},
+    {question:"Qual deve ser o tom de voz usado na abordagem?", options:["Alto e autoritário","Claro, audível e modulado","Baixo e quase inaudível","Rápido e apressado"], correctIndex:1},
+    {question:"O que significa escuta ativa?", options:["Interromper o cliente para corrigir","Repetir gírias para criar proximidade","Prestar atenção, confirmar e resumir o que o cliente disse","Deixar o cliente falar sem responder"], correctIndex:2},
+    {question:"Antes da visita, o que NÃO faz parte do planejamento?", options:["Pesquisar sobre o lojista","Preparar material de apoio","Planejar rota","Improvisar totalmente na hora"], correctIndex:3},
+    {question:"Durante a visita, qual é a melhor forma de iniciar a conversa?", options:["Com um quebra-gelo ou elogio sincero","Perguntando direto sobre vendas","Entregando contrato de imediato","Falando mal de concorrentes"], correctIndex:0},
+    {question:"Se o lojista disser ‘já trabalho com outra financeira’, a melhor resposta é:", options:["Então não preciso explicar","Nossos clientes também usavam outras, mas migraram pelos nossos diferenciais","A concorrência é ruim, só nós prestamos","Se mudar de ideia me procure"], correctIndex:1},
+    {question:"Qual item é essencial após a visita?", options:["Esquecer o que foi conversado","Enviar mensagem de agradecimento","Evitar contato para não incomodar","Esperar o cliente ligar"], correctIndex:1},
+    {question:"Qual deve ser o foco principal da apresentação?", options:["Características do produto","Benefícios para o lojista","Falar apenas sobre preço","Criticar concorrentes"], correctIndex:1},
+    {question:"Qual vestimenta é adequada para homens?", options:["Calça rasgada, camiseta colorida","Uniforme bem passado e cores neutras","Boné e chinelo","Roupas informais e chamativas"], correctIndex:1},
+    {question:"Qual vestimenta é adequada para mulheres?", options:["Roupas curtas e coloridas","Uniforme bem passado, cores neutras e cabelo arrumado","Maquiagem exagerada","Sandália de praia"], correctIndex:1},
+    {question:"Se o lojista disser ‘está caro’, qual é a melhor resposta?", options:["Então não compre","Entendo, mas veja o retorno que você terá","É o preço que temos, não tem o que fazer","Se não quiser, eu saio"], correctIndex:1},
+    {question:"O que é recomendado levar sempre na visita?", options:["Material de vendas completo","Apenas celular","Nada, para não parecer insistente","Apenas cartão pessoal"], correctIndex:0},
+    {question:"Qual a melhor postura corporal durante a abordagem?", options:["Braços cruzados","De pé, postura aberta e receptiva","De costas para o lojista","Sempre sentado"], correctIndex:1},
+    {question:"Após o lojista dizer ‘preciso conversar com meu sócio’, o vendedor deve:", options:["Encerrar a visita imediatamente","Oferecer preparar resumo para o sócio","Dizer que não é necessário","Pressionar para decidir sozinho"], correctIndex:1},
+    {question:"Qual a vantagem de usar perguntas abertas?", options:["Fecham a conversa mais rápido","Estimulam o lojista a falar mais","Limitam as respostas a sim/não","Desgastam a paciência do cliente"], correctIndex:1},
+    {question:"O que significa adaptar a linguagem ao perfil do lojista?", options:["Falar difícil para parecer inteligente","Usar sempre gírias","Ajustar vocabulário de acordo com o cliente","Falar apenas sobre preço"], correctIndex:2},
+    {question:"O que deve ser feito logo após sair da loja?", options:["Atualizar lista de visitas e registrar informações","Esquecer para não ocupar memória","Não anotar nada","Esperar a próxima semana para lembrar"], correctIndex:0},
+    {question:"Se o lojista não estiver interessado, a melhor atitude é:", options:["Forçar a venda até ele aceitar","Perguntar o que não interessou e anotar feedback","Encerrar sem agradecer","Deixar de lado e nunca mais voltar"], correctIndex:1},
+    {question:"Qual é um diferencial da SouFacil?", options:["Aprovação sem burocracia","Vendas apenas à vista","Taxa fixa e alta para todos","Não oferecer parcelamento"], correctIndex:0},
 
-      // 31–80 (Kahoot 50)
-      {question:"Qual é o foco principal da SouFacil?", options:["Aumentar vendas e crescimento do lojista","Reduzir custos de fornecedores","Vender produtos físicos","Criar franquias"], correctIndex:0},
-      {question:"Qual é o serviço principal da SouFacil?", options:["Cartão de crédito próprio","Crediário no boleto","Empréstimos pessoais","Maquininha de cartão"], correctIndex:1},
-      {question:"O que a SouFacil garante ao lojista no crediário?", options:["Pagamento apenas se o cliente pagar","Garantia de recebimento","Reembolso após 90 dias","Parcelamento sem juros"], correctIndex:1},
-      {question:"Um dos diferenciais da SouFacil é:", options:["Aprovação demorada","Processo 100% digital","Alta burocracia","Exigir renda comprovada"], correctIndex:1},
-      {question:"Qual é a principal vantagem para o lojista usar SouFacil?", options:["Aumentar inadimplência","Garantir recebimento","Reduzir estoque","Evitar clientes"], correctIndex:1},
-      {question:"O crediário da SouFacil permite parcelar compras em:", options:["Cheque","Boleto","PIX","Débito automático"], correctIndex:1},
-      {question:"O lojista recebe o valor da venda:", options:["Apenas se o cliente pagar","Sempre, independente do cliente","6 meses depois","Em vale-compras"], correctIndex:1},
-      {question:"A análise de crédito da SouFacil é feita com:", options:["CPF e telefone","Holerite e comprovante de endereço","Certidão de nascimento","Declaração de imposto de renda"], correctIndex:0},
-      {question:"Qual o tempo médio da aprovação de crédito?", options:["Horas","Segundos","Dias","Semanas"], correctIndex:1},
-      {question:"Quais documentos o cliente precisa levar?", options:["Apenas documento com foto","RG, CPF, holerite, comprovante de residência","Carteira de trabalho","Nenhum documento"], correctIndex:0},
-      {question:"A taxa de juros varia entre:", options:["2% a 3%","5,49% a 7,99%","10% a 15%","1% fixo"], correctIndex:1},
-      {question:"Em uma compra de R$ 1.000 em 10x com 5,99% de juros, quanto o cliente pagará por parcela?", options:["R$ 100,00","R$ 159,90","R$ 120,00","R$ 200,00"], correctIndex:1},
-      {question:"Quanto maior a quantidade de parcelas:", options:["Menor o valor total","Maior o valor total","O valor não muda","O lojista perde o pagamento"], correctIndex:1},
-      {question:"Quem paga os juros?", options:["Sempre o lojista","Sempre o cliente","Depende da configuração do sistema","O governo"], correctIndex:2},
-      {question:"O sistema da SouFacil adiciona os juros:", options:["Após o cliente pagar","No momento da compra","No fechamento do mês","Na entrega do produto"], correctIndex:1},
-      {question:"O que é o SouFacil Card?", options:["Cartão de crédito tradicional","Cartão de marca própria para lojistas","Vale-alimentação","Cartão de débito pré-pago"], correctIndex:1},
-      {question:"Qual o limite inicial do cartão?", options:["R$ 100","R$ 300","R$ 500","R$ 1.000"], correctIndex:1},
-      {question:"Qual o limite máximo do cartão?", options:["R$ 1.000","R$ 1.200","R$ 1.500","R$ 2.000"], correctIndex:2},
-      {question:"O aumento do limite é feito em:", options:["+5% ao mês","+20% ao mês","+10% ao mês","De acordo com o lojista"], correctIndex:1},
-      {question:"O cartão ajuda o lojista a:", options:["Fidelizar clientes","Reduzir vendas","Trocar de bandeira","Evitar promoções"], correctIndex:0},
-      {question:"O SouFacil Card garante:", options:["Recebimento mesmo sem pagamento","Pagamento só à vista","Risco de inadimplência","Menos vendas"], correctIndex:0},
-      {question:"Qual a mensalidade do cartão para o cliente?", options:["R$ 14,90","R$ 9,90","R$ 19,90","Zero"], correctIndex:0},
-      {question:"Se o cliente não usar o cartão, ele paga mensalidade?", options:["Sim, sempre","Não","Depende do lojista","Só paga 50%"], correctIndex:1},
-      {question:"Qual o investimento inicial para o lojista implantar o cartão?", options:["R$ 1.000 (500 plataforma + 500 marketing)","R$ 200","R$ 5.000","Zero"], correctIndex:0},
-      {question:"Qual a mensalidade para o lojista manter o cartão?", options:["R$ 100","R$ 150","R$ 200","R$ 300"], correctIndex:1},
-      {question:"Qual o valor do pacote de 150 cartões?", options:["R$ 500","R$ 750","R$ 1.000","R$ 1.500"], correctIndex:0},
-      {question:"Qual o valor do pacote de 300 cartões?", options:["R$ 1.000","R$ 750","R$ 500","R$ 2.000"], correctIndex:1},
-      {question:"Qual o valor do pacote de 500 cartões?", options:["R$ 1.000","R$ 1.500","R$ 750","R$ 2.500"], correctIndex:0},
-      {question:"O valor de um cartão avulso é:", options:["R$ 1,99","R$ 4,99","R$ 9,99","R$ 14,99"], correctIndex:1},
-      {question:"O cliente recebe o cartão físico:", options:["Pelo correio","Diretamente na loja","Apenas no celular","No banco"], correctIndex:1},
-      {question:"Qual é o valor de bonificação por cartão ativo?", options:["R$ 10,00","R$ 5,00","R$ 2,00","R$ 1,00"], correctIndex:1},
-      {question:"Para receber a bonificação, o cliente precisa:", options:["Comprar pelo menos R$ 50","Comprar qualquer valor","Apenas ativar o cartão","Usar por 1 ano"], correctIndex:0},
-      {question:"Quando ocorre o pagamento da bonificação?", options:["Todo dia 1","Todo dia 10","Todo dia 15","Todo dia 30"], correctIndex:1},
-      {question:"Se cair no feriado ou final de semana, o pagamento ocorre:", options:["No mesmo dia","No próximo dia útil","Só no mês seguinte","Não é pago"], correctIndex:1},
-      {question:"O vendedor precisa estar:", options:["Cadastrado no sistema","Ligado a um banco","Registrado em cartório","Apenas indicar clientes"], correctIndex:0},
-      {question:"Qual a taxa de 1 parcela no cartão?", options:["2,5%","3,5%","4,5%","5,5%"], correctIndex:2},
-      {question:"Qual a taxa de 2 a 3 parcelas?", options:["4,5%","5,5%","6,5%","7,5%"], correctIndex:1},
-      {question:"Qual a taxa de 4 a 5 parcelas?", options:["5,5%","6,5%","7,5%","8,5%"], correctIndex:1},
-      {question:"Essas taxas podem ser:", options:["Apenas repassadas ao cliente","Apenas absorvidas pelo lojista","Repassadas ou absorvidas","Não existem taxas"], correctIndex:2},
-      {question:"Os repasses financeiros são feitos:", options:["Todo dia","Toda semana","A cada 6 meses","Apenas no fim do ano"], correctIndex:1},
-      {question:"A consulta do cliente é feita em:", options:["Segundos","Minutos","Horas","Dias"], correctIndex:0},
-      {question:"Após o cadastro, o cliente recebe:", options:["E-mail","Notificação com link para reconhecimento facial","Carta pelos correios","Telefone de confirmação"], correctIndex:1},
-      {question:"O número do cartão é enviado:", options:["Por SMS","Por WhatsApp","Por e-mail","Pelo lojista"], correctIndex:1},
-      {question:"O cartão precisa ser:", options:["Desbloqueado","Recarregado","Renovado a cada ano","Trocado no banco"], correctIndex:0},
-      {question:"As compras vencem:", options:["30 dias após","Na mesma data no mês seguinte","A cada 45 dias","Somente no fechamento anual"], correctIndex:1},
-      {question:"O SouFacil ajuda o lojista a:", options:["Vender mais","Vender menos","Perder clientes","Aumentar inadimplência"], correctIndex:0},
-      {question:"Para o cliente final, o benefício é:", options:["Mais burocracia","Mais formas de pagamento","Menos opções","Apenas crédito à vista"], correctIndex:1},
-      {question:"O crediário no boleto é importante porque:", options:["Muitos não têm cartão de crédito","Os clientes preferem cheque","Só funciona em bancos","É mais caro sempre"], correctIndex:0},
-      {question:"A SouFacil pode ser considerada:", options:["Uma parceira do lojista","Uma concorrente","Um banco tradicional","Uma empresa de cobrança"], correctIndex:0},
-      {question:"Qual slogan resume a SouFacil?", options:["Mais burocracia, menos vendas","Soluções financeiras para vender mais","Só para grandes empresas","Parcelamento apenas no cartão"], correctIndex:1}
-    ];
+    // Kahoot 50 (continuando)
+    {question:"Qual é o foco principal da SouFacil?", options:["Aumentar vendas e crescimento do lojista","Reduzir custos de fornecedores","Vender produtos físicos","Criar franquias"], correctIndex:0},
+    {question:"Qual é o serviço principal da SouFacil?", options:["Cartão de crédito próprio","Crediário no boleto","Empréstimos pessoais","Maquininha de cartão"], correctIndex:1},
+    {question:"O que a SouFacil garante ao lojista no crediário?", options:["Pagamento apenas se o cliente pagar","Garantia de recebimento","Reembolso após 90 dias","Parcelamento sem juros"], correctIndex:1},
+    {question:"Um dos diferenciais da SouFacil é:", options:["Aprovação demorada","Processo 100% digital","Alta burocracia","Exigir renda comprovada"], correctIndex:1},
+    {question:"Qual é a principal vantagem para o lojista usar SouFacil?", options:["Aumentar inadimplência","Garantir recebimento","Reduzir estoque","Evitar clientes"], correctIndex:1},
+    {question:"O crediário da SouFacil permite parcelar compras em:", options:["Cheque","Boleto","PIX","Débito automático"], correctIndex:1},
+    {question:"O lojista recebe o valor da venda:", options:["Apenas se o cliente pagar","Sempre, independente do cliente","6 meses depois","Em vale-compras"], correctIndex:1},
+    {question:"A análise de crédito da SouFacil é feita com:", options:["CPF e telefone","Holerite e comprovante de endereço","Certidão de nascimento","Declaração de imposto de renda"], correctIndex:0},
+    {question:"Qual o tempo médio da aprovação de crédito?", options:["Horas","Segundos","Dias","Semanas"], correctIndex:1},
+    {question:"Quais documentos o cliente precisa levar?", options:["Apenas documento com foto","RG, CPF, holerite, comprovante de residência","Carteira de trabalho","Nenhum documento"], correctIndex:0},
+    {question:"A taxa de juros varia entre:", options:["2% a 3%","5,49% a 7,99%","10% a 15%","1% fixo"], correctIndex:1},
+    {question:"Em uma compra de R$ 1.000 em 10x com 5,99% de juros, quanto o cliente pagará por parcela?", options:["R$ 100,00","R$ 159,90","R$ 120,00","R$ 200,00"], correctIndex:1},
+    {question:"Quanto maior a quantidade de parcelas:", options:["Menor o valor total","Maior o valor total","O valor não muda","O lojista perde o pagamento"], correctIndex:1},
+    {question:"Quem paga os juros?", options:["Sempre o lojista","Sempre o cliente","Depende da configuração do sistema","O governo"], correctIndex:2},
+    {question:"O sistema da SouFacil adiciona os juros:", options:["Após o cliente pagar","No momento da compra","No fechamento do mês","Na entrega do produto"], correctIndex:1},
+    {question:"O que é o SouFacil Card?", options:["Cartão de crédito tradicional","Cartão de marca própria para lojistas","Vale-alimentação","Cartão de débito pré-pago"], correctIndex:1},
+    {question:"Qual o limite inicial do cartão?", options:["R$ 100","R$ 300","R$ 500","R$ 1.000"], correctIndex:1},
+    {question:"Qual o limite máximo do cartão?", options:["R$ 1.000","R$ 1.200","R$ 1.500","R$ 2.000"], correctIndex:2},
+    {question:"O aumento do limite é feito em:", options:["+5% ao mês","+20% ao mês","+10% ao mês","De acordo com o lojista"], correctIndex:1},
+    {question:"O cartão ajuda o lojista a:", options:["Fidelizar clientes","Reduzir vendas","Trocar de bandeira","Evitar promoções"], correctIndex:0},
+    {question:"O SouFacil Card garante:", options:["Recebimento mesmo sem pagamento","Pagamento só à vista","Risco de inadimplência","Menos vendas"], correctIndex:0},
+    {question:"Qual a mensalidade do cartão para o cliente?", options:["R$ 14,90","R$ 9,90","R$ 19,90","Zero"], correctIndex:0},
+    {question:"Se o cliente não usar o cartão, ele paga mensalidade?", options:["Sim, sempre","Não","Depende do lojista","Só paga 50%"], correctIndex:1},
+    {question:"Qual o investimento inicial para o lojista implantar o cartão?", options:["R$ 1.000 (500 plataforma + 500 marketing)","R$ 200","R$ 5.000","Zero"], correctIndex:0},
+    {question:"Qual a mensalidade para o lojista manter o cartão?", options:["R$ 100","R$ 150","R$ 200","R$ 300"], correctIndex:1},
+    {question:"Qual o valor do pacote de 150 cartões?", options:["R$ 500","R$ 750","R$ 1.000","R$ 1.500"], correctIndex:0},
+    {question:"Qual o valor do pacote de 300 cartões?", options:["R$ 1.000","R$ 750","R$ 500","R$ 2.000"], correctIndex:1},
+    {question:"Qual o valor do pacote de 500 cartões?", options:["R$ 1.000","R$ 1.500","R$ 750","R$ 2.500"], correctIndex:0},
+    {question:"O valor de um cartão avulso é:", options:["R$ 1,99","R$ 4,99","R$ 9,99","R$ 14,99"], correctIndex:1},
+    {question:"O cliente recebe o cartão físico:", options:["Pelo correio","Diretamente na loja","Apenas no celular","No banco"], correctIndex:1},
+    {question:"Qual é o valor de bonificação por cartão ativo?", options:["R$ 10,00","R$ 5,00","R$ 2,00","R$ 1,00"], correctIndex:1},
+    {question:"Para receber a bonificação, o cliente precisa:", options:["Comprar pelo menos R$ 50","Comprar qualquer valor","Apenas ativar o cartão","Usar por 1 ano"], correctIndex:0},
+    {question:"Quando ocorre o pagamento da bonificação?", options:["Todo dia 1","Todo dia 10","Todo dia 15","Todo dia 30"], correctIndex:1},
+    {question:"Se cair no feriado ou final de semana, o pagamento ocorre:", options:["No mesmo dia","No próximo dia útil","Só no mês seguinte","Não é pago"], correctIndex:1},
+    {question:"O vendedor precisa estar:", options:["Cadastrado no sistema","Ligado a um banco","Registrado em cartório","Apenas indicar clientes"], correctIndex:0},
+    {question:"Qual a taxa de 1 parcela no cartão?", options:["2,5%","3,5%","4,5%","5,5%"], correctIndex:2},
+    {question:"Qual a taxa de 2 a 3 parcelas?", options:["4,5%","5,5%","6,5%","7,5%"], correctIndex:1},
+    {question:"Qual a taxa de 4 a 5 parcelas?", options:["5,5%","6,5%","7,5%","8,5%"], correctIndex:1},
+    {question:"Essas taxas podem ser:", options:["Apenas repassadas ao cliente","Apenas absorvidas pelo lojista","Repassadas ou absorvidas","Não existem taxas"], correctIndex:2},
+    {question:"Os repasses financeiros são feitos:", options:["Todo dia","Toda semana","A cada 6 meses","Apenas no fim do ano"], correctIndex:1},
+    {question:"A consulta do cliente é feita em:", options:["Segundos","Minutos","Horas","Dias"], correctIndex:0},
+    {question:"Após o cadastro, o cliente recebe:", options:["E-mail","Notificação com link para reconhecimento facial","Carta pelos correios","Telefone de confirmação"], correctIndex:1},
+    {question:"O número do cartão é enviado:", options:["Por SMS","Por WhatsApp","Por e-mail","Pelo lojista"], correctIndex:1},
+    {question:"O cartão precisa ser:", options:["Desbloqueado","Recarregado","Renovado a cada ano","Trocado no banco"], correctIndex:0},
+    {question:"As compras vencem:", options:["30 dias após","Na mesma data no mês seguinte","A cada 45 dias","Somente no fechamento anual"], correctIndex:1},
+    {question:"O SouFacil ajuda o lojista a:", options:["Vender mais","Vender menos","Perder clientes","Aumentar inadimplência"], correctIndex:0},
+    {question:"Para o cliente final, o benefício é:", options:["Mais burocracia","Mais formas de pagamento","Menos opções","Apenas crédito à vista"], correctIndex:1},
+    {question:"O crediário no boleto é importante porque:", options:["Muitos não têm cartão de crédito","Os clientes preferem cheque","Só funciona em bancos","É mais caro sempre"], correctIndex:0},
+    {question:"A SouFacil pode ser considerada:", options:["Uma parceira do lojista","Uma concorrente","Um banco tradicional","Uma empresa de cobrança"], correctIndex:0},
+    {question:"Qual slogan resume a SouFacil?", options:["Mais burocracia, menos vendas","Soluções financeiras para vender mais","Só para grandes empresas","Parcelamento apenas no cartão"], correctIndex:1}
+  ];
 
-    // 🔧 Estado e utilitários
-    const $ = (s)=>document.querySelector(s);
-    const el = (tag, attrs={}, children=[])=>{const e=document.createElement(tag);for(const k in attrs){if(k==='class')e.className=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}children.forEach(c=>e.appendChild(c));return e};
-    const uid = ()=>Math.random().toString(36).slice(2,10);
+  /***** Estado local *****/
+  let roomCode = null;
+  let playerId = null;
+  let playerName = null;
+  const QUESTION_DURATION = 20; // segundos fixos
 
-    // 🔥 Firebase init
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  // Elementos
+  const btnJoin = document.getElementById('btnJoin');
+  const btnStart = document.getElementById('btnStart');
+  const roomInput = document.getElementById('roomInput');
+  const nameInput = document.getElementById('nameInput');
+  const joinedInfo = document.getElementById('joinedInfo');
+  const playersList = document.getElementById('playersList');
+  const statusArea = document.getElementById('statusArea');
+  const questionArea = document.getElementById('questionArea');
+  const qIndex = document.getElementById('qIndex');
+  const qText = document.getElementById('qText');
+  const optionsWrap = document.getElementById('optionsWrap');
+  const timerBar = document.getElementById('timerBar');
+  const timeLeft = document.getElementById('timeLeft');
+  const summaryArea = document.getElementById('summaryArea');
+  const endArea = document.getElementById('endArea');
+  const finalRanking = document.getElementById('finalRanking');
+  const btnRestartLocal = document.getElementById('btnRestartLocal');
 
-    const state = { role:null, room:null, hostId:null, playerId:null, duration:30, base:1000, unsubRoom:null, unsubPlayers:null };
+  // Helpers
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+  function now(){ return Date.now(); }
 
-    // Host: criar sala com perguntas embutidas em subcoleção
-    async function hostCreateRoom(){
-      state.duration = Math.max(5, parseInt($('#qDuration').value||30));
-      state.base = Math.max(100, parseInt($('#baseScore').value||1000));
-      const code = ($('#roomCode').value||'').trim().toUpperCase() || ('SF'+uid().slice(0,5)).toUpperCase();
-      const hostName = ($('#hostName').value||'Host').trim();
-      const ref = db.collection('rooms').doc(code);
-      await ref.set({createdAt: Date.now(), status:'lobby', currentIndex:-1, duration: state.duration, base: state.base, qCount: BUILTIN_QUESTIONS.length, hostName, startedAt:null});
-      // Salva perguntas
-      const batch = db.batch();
-      BUILTIN_QUESTIONS.forEach((q,idx)=>{ batch.set(ref.collection('questions').doc(String(idx)), q); });
-      await batch.commit();
-      state.role='host'; state.room=code; state.hostId=uid();
-      $('#hostInfo').innerHTML = `Sala <b>${code}</b> criada. Compartilhe o código com os jogadores.`;
-      $('#btnStart').disabled=false; $('#btnNext').disabled=true; $('#btnEnd').disabled=false;
-      subscribeRoomForHost(code); subscribePlayers(code);
-    }
+  // Database refs
+  function roomRef(code){ return db.ref('rooms/'+code); }
+  function playersRef(code){ return db.ref('rooms/'+code+'/players'); }
+  function answersRef(code, index){ return db.ref('rooms/'+code+'/answers/'+index); }
+  function summariesRef(code, index){ return db.ref('rooms/'+code+'/summaries/'+index); }
 
-    async function pushQuestion(idx){
-      const ref = db.collection('rooms').doc(state.room);
-      await ref.update({ currentIndex: idx, status:'question', startedAt: Date.now() });
-    }
+  // Join
+  btnJoin.onclick = async ()=>{
+    const code = (roomInput.value||'').trim();
+    const name = (nameInput.value||'').trim();
+    if(!code || !name){ alert('Digite código da sala e seu nome.'); return; }
+    roomCode = code;
+    playerName = name;
+    playerId = uid();
+    // create player record
+    await playersRef(roomCode).child(playerId).set({ id:playerId, name:playerName, score:0, joinedAt: now() });
+    joinedInfo.innerHTML = `Você entrou como <b>${playerName}</b> na sala <b>${roomCode}</b>.`;
+    btnStart.disabled = false;
+    observeRoom(roomCode);
+    observePlayers(roomCode);
+  };
 
-    function subscribeRoomForHost(code){
-      if(state.unsubRoom) state.unsubRoom();
-      state.unsubRoom = db.collection('rooms').doc(code).onSnapshot(async snap=>{
-        const r = snap.data(); if(!r) return;
-        const qWrap = $('#liveQuestion'); qWrap.innerHTML='';
-        if(r.currentIndex>=0){
-          const qDoc = await snap.ref.collection('questions').doc(String(r.currentIndex)).get();
-          const q = qDoc.data();
-          qWrap.appendChild(el('div',{html:`<div class='pill'>Pergunta ${r.currentIndex+1}/${r.qCount}</div><h2>${q.question}</h2>`}));
-          const stats = await snap.ref.collection('players').get();
-          const total = stats.size;
-          const answered = stats.docs.filter(d=> (d.data().lastIndex===r.currentIndex)).length;
-          $('#liveStats').innerHTML = `Respondidas: <b>${answered}</b> / ${total}`;
-        } else {
-          $('#liveStats').innerHTML = 'Sala no lobby.';
-        }
-      });
-    }
+  // Start (anyone)
+  btnStart.onclick = async ()=>{
+    if(!roomCode) return alert('Entre na sala primeiro.');
+    const r = roomRef(roomCode);
+    // Initialize room record (only if not exists)
+    await r.update({
+      status: 'lobby',
+      currentIndex: null,
+      startedBy: playerId,
+      startedAt: null,
+      duration: QUESTION_DURATION
+    });
+    // start game immediately: set first question
+    startGameAsStarter();
+    btnStart.disabled = true;
+  };
 
-    function subscribePlayers(code){
-      if(state.unsubPlayers) state.unsubPlayers();
-      state.unsubPlayers = db.collection('rooms').doc(code).collection('players')
-        .orderBy('score','desc').onSnapshot(snap=>{
-          const arr = snap.docs.map(d=>d.data());
-          const hostLb = $('#hostLeaderboard'); hostLb.innerHTML='';
-          const wrap = el('div');
-          arr.slice(0,10).forEach((p,i)=>{
-            wrap.appendChild(el('div',{class:'leader'},[
-              el('div',{class:'pill',html:'#'+(i+1)}),
-              el('div',{html:`<b>${p.name}</b>`}),
-              el('div',{html:`<div class='pill'>${p.score} pts</div>`}),
-            ]));
-          });
-          hostLb.appendChild(wrap);
-        });
-    }
+  // Starter: schedules progression
+  async function startGameAsStarter(){
+    const r = roomRef(roomCode);
+    // set currentIndex=0 and startedAt
+    await r.update({ currentIndex: 0, status: 'question', startedAt: now(), duration: QUESTION_DURATION });
+    // schedule timer loop
+    scheduleNextTick();
+  }
 
-    // Host UI buttons
-    $('#btnInitHost').onclick = hostCreateRoom;
-    $('#btnStart').onclick = ()=> pushQuestion(0);
-    $('#btnNext').onclick = async ()=>{
-      const ref = db.collection('rooms').doc(state.room); const snap = await ref.get(); const r=snap.data();
-      const next = r.currentIndex + 1; if(next < r.qCount) await pushQuestion(next); else await ref.update({status:'ended'});
-    };
-    $('#btnEnd').onclick = async ()=>{ if(!state.room) return; await db.collection('rooms').doc(state.room).update({status:'ended'}); };
-
-    // Habilitar Próxima quando todo mundo respondeu ou tempo acabou
-    setInterval(async ()=>{
-      if(state.role!== 'host' || !state.room) return;
-      const ref = db.collection('rooms').doc(state.room); const snap = await ref.get(); if(!snap.exists) return; const r=snap.data();
-      if(r.status==='question'){
-        const dur = (r.duration||30)*1000; const endAt = (r.startedAt||0)+dur; const now=Date.now();
-        const pSnap = await ref.collection('players').get(); const total = pSnap.size; const answered = pSnap.docs.filter(d=> d.data().lastIndex===r.currentIndex).length;
-        $('#btnNext').disabled = (now < endAt) && (answered < total && total>0);
+  // schedule loop executed by starter: wait duration and aggregate
+  function scheduleNextTick(){
+    // Only the starter schedules. We'll set an onDisconnect marker to allow detection (not implemented advanced failover)
+    (async ()=>{
+      while(true){
+        const snap = await roomRef(roomCode).once('value');
+        const room = snap.val();
+        if(!room) return;
+        if(room.status === 'ended'){ return; }
+        if(room.status !== 'question') return; // only progress when question
+        const idx = room.currentIndex;
+        const startedAt = room.startedAt || now();
+        const durMs = (room.duration||QUESTION_DURATION) * 1000;
+        const endAt = startedAt + durMs;
+        const wait = Math.max(0, endAt - now());
+        // wait
+        await new Promise(res => setTimeout(res, wait + 50)); // plus small buffer
+        // After end, aggregate answers and create summary
+        try {
+          await aggregateAnswersAndAdvance(roomCode, idx);
+        } catch(e){ console.error('Erro ao agregar/avançar', e); }
+        // after aggregateAnswersAndAdvance executes, loop will continue if status set to next question
       }
-    }, 1000);
+    })();
+  }
 
-    // Jogador
-    function setView(id){ ['phaseLobby','phaseQuestion','phaseFeedback','phaseEnd'].forEach(v=>{const e=document.getElementById(v); if(e) e.classList.add('hidden');}); const t=document.getElementById(id); if(t) t.classList.remove('hidden'); }
-    function renderTimer(msLeft,total){ const pct=Math.max(0,Math.min(100,(msLeft/total)*100)); return `<div class="timer"><div style="width:${pct}%"></div></div>`; }
-
-    $('#btnInitPlayer').onclick = ()=>{ $('#btnJoin').disabled=false; alert('Conectado. Digite o código da sala e seu nome.'); };
-
-    $('#btnJoin').onclick = async ()=>{
-      const code = ($('#joinRoom').value||'').trim().toUpperCase(); const name = ($('#playerName').value||'').trim() || 'Jogador';
-      if(!code) return alert('Digite o código da sala.');
-      const roomRef = db.collection('rooms').doc(code); const roomSnap = await roomRef.get(); if(!roomSnap.exists) return alert('Sala não encontrada.');
-      state.role='player'; state.room=code; state.playerId=uid();
-      await roomRef.collection('players').doc(state.playerId).set({ id: state.playerId, name, score:0, lastIndex:-1, correct:false, answeredAt:null, joinedAt: Date.now() });
-      watchRoomAsPlayer(); $('#btnJoin').disabled=true; $('#phaseLobby').innerHTML=`Conectado à sala <b>${code}</b>. Aguarde o apresentador.`;
-    };
-
-    function watchRoomAsPlayer(){
-      const rRef = db.collection('rooms').doc(state.room);
-      if(state.unsubRoom) state.unsubRoom();
-      state.unsubRoom = rRef.onSnapshot(async snap=>{
-        const r = snap.data(); if(!r) return;
-        if(r.status==='lobby'){ setView('phaseLobby'); return; }
-        if(r.status==='ended'){ setView('phaseEnd'); $('#phaseEnd').innerHTML='<h2>Jogo encerrado</h2>'; return; }
-        const qRef = rRef.collection('questions').doc(String(r.currentIndex)); const qDoc = await qRef.get(); const q = qDoc.data();
-        const dur = (r.duration||30)*1000; const endAt = (r.startedAt||Date.now()) + dur; const now=Date.now(); const msLeft = endAt-now;
-        setView('phaseQuestion');
-        const wrap = $('#phaseQuestion'); const already = window.localStorage.getItem('ans-'+state.room+'-'+r.currentIndex) === '1';
-        wrap.innerHTML = `<div class='pill'>Pergunta ${r.currentIndex+1}/${r.qCount}</div><h2>${q.question}</h2><div id='timerWrap'>${renderTimer(msLeft,dur)}</div><div class='grid cols-2' id='ops'></div><div class='muted'>Você só pode responder uma vez.</div>`;
-        const ops = $('#ops'); q.options.forEach((op,i)=>{ const d=el('div',{class:'option',html:op}); d.onclick = async ()=>{
-            if(already) return; const timeNow=Date.now(); const inTime = timeNow < endAt; let score = 0; let correct=false; if(inTime && i===q.correctIndex){ const remain = endAt - timeNow; const bonus = Math.max(0, Math.floor((remain/dur) * (r.base||1000)*0.5)); score = (r.base||1000) + bonus; correct=true; }
-            await rRef.collection('players').doc(state.playerId).set({ lastIndex:r.currentIndex, answeredAt: timeNow, correct, score: firebase.firestore.FieldValue.increment(score) }, {merge:true});
-            window.localStorage.setItem('ans-'+state.room+'-'+r.currentIndex,'1'); setView('phaseFeedback'); $('#phaseFeedback').innerHTML = `<h2>${correct?'✅ Acertou!':'❌ Errou'}</h2><div class='muted'>${correct?('+'+score+' pts'):'Tente a próxima'}</div>`;
-          }; ops.appendChild(d); });
-        const tEl = document.getElementById('timerWrap'); const tick=()=>{ const ms=endAt-Date.now(); tEl.innerHTML=renderTimer(ms,dur); if(ms>0) requestAnimationFrame(tick); else $('#phaseFeedback').classList.remove('hidden'); }; requestAnimationFrame(tick);
-      });
+  // Aggregation: read answers for index, compute points, write summary and update players
+  async function aggregateAnswersAndAdvance(code, index){
+    const rRef = roomRef(code);
+    const rSnap = await rRef.once('value'); const room = rSnap.val();
+    if(!room) return;
+    // To avoid race: only proceed if room.currentIndex == index and status == 'question'
+    if(room.currentIndex !== index || room.status !== 'question') return;
+    const ansSnap = await answersRef(code, index).once('value');
+    const answers = ansSnap.val() || {};
+    // Build summary list
+    const summaryList = [];
+    // For each player in room, check answer
+    const playersSnap = await playersRef(code).once('value');
+    const players = playersSnap.val() || {};
+    // compute points: base fixed 1000 (we can adjust), bonus proportional to remaining time (but since we aggregate after end, we approximate: earlier responders get small advantage by submittedAt)
+    const basePoints = 1000;
+    // Convert answers object {playerId: {choice, ts}}
+    // We'll sort by answeredAt ascending to assign small extra bonus for speed (optional)
+    const arrAnswers = Object.keys(answers).map(pid=>({ pid, choice: answers[pid].choice, ts: answers[pid].ts || 0 }));
+    arrAnswers.sort((a,b)=> (a.ts||0) - (b.ts||0));
+    // assign
+    for(const a of arrAnswers){
+      const p = players[a.pid] ? players[a.pid].name : ('Jogador');
+      const choiceIndex = a.choice;
+      const q = QUESTIONS[index];
+      const correct = (choiceIndex === q.correctIndex);
+      // speed bonus: earlier responder gets small bonus up to 500
+      const rank = arrAnswers.findIndex(x=>x.pid===a.pid);
+      const speedBonus = Math.max(0, 500 - (rank * 40)); // example
+      const points = correct ? (basePoints + speedBonus) : 0;
+      summaryList.push({ pid: a.pid, name: p, choiceIndex, choiceText: q.options[choiceIndex], correct, points });
     }
+    // Also include players who didn't answer
+    Object.keys(players).forEach(pid=>{
+      if(!answers[pid]){
+        summaryList.push({ pid, name: players[pid].name, choiceIndex: null, choiceText: '-', correct: false, points: 0 });
+      }
+    });
+    // Write summary to DB
+    await summariesRef(code, index).set({ createdAt: now(), list: summaryList });
+    // Update each player's score (increment)
+    const updates = {};
+    summaryList.forEach(s=>{
+      if(s.points && s.points>0){
+        updates['players/'+s.pid+'/score'] = (players[s.pid] && players[s.pid].score ? players[s.pid].score + s.points : s.points);
+      }
+    });
+    // apply updates atomically
+    await rRef.update({ status: 'summary' });
+    if(Object.keys(updates).length) await db.ref('rooms/'+code).update(updates);
+    // small pause to let clients see the summary (3s)
+    await new Promise(res => setTimeout(res, 3000));
+    // advance to next or end
+    const nextIndex = index + 1;
+    if(nextIndex >= QUESTIONS.length){
+      await rRef.update({ status: 'ended', currentIndex: nextIndex, endedAt: now() });
+    } else {
+      await rRef.update({ status: 'question', currentIndex: nextIndex, startedAt: now() });
+    }
+  }
+
+  // Observe room changes and update UI (clients)
+  function observeRoom(code){
+    roomRef(code).on('value', snap=>{
+      const room = snap.val();
+      if(!room){ statusArea.innerText = 'Sala criada, aguardando jogadores...'; return; }
+      if(room.status === 'lobby'){ statusArea.innerText = 'Sala em lobby. Clique Iniciar para começar.'; }
+      if(room.status === 'question'){
+        // show question
+        const idx = room.currentIndex;
+        const q = QUESTIONS[idx];
+        showQuestion(idx, q, room.startedAt, room.duration || QUESTION_DURATION);
+      } else if(room.status === 'summary'){
+        // show summary for currentIndex
+        const idx = room.currentIndex;
+        showSummary(code, idx);
+      } else if(room.status === 'ended'){
+        showEnd(code);
+      }
+    });
+  }
+
+  // Observe players list
+  function observePlayers(code){
+    playersRef(code).on('value', snap=>{
+      const players = snap.val() || {};
+      renderPlayers(players);
+    });
+  }
+
+  function renderPlayers(players){
+    playersList.innerHTML = '';
+    Object.keys(players).forEach(pid=>{
+      const p = players[pid];
+      const d = document.createElement('div'); d.className='lc';
+      d.innerHTML = `<div>${p.name}</div><div class="small">${p.score||0} pts</div>`;
+      playersList.appendChild(d);
+    });
+  }
+
+  // Show question (client-side)
+  let localAnswered = false;
+  function showQuestion(index, q, startedAt, duration){
+    endArea.classList.add('hidden');
+    questionArea.classList.remove('hidden');
+    summaryArea.innerHTML = '';
+    qIndex.innerText = `Pergunta ${index+1}/${QUESTIONS.length}`;
+    qText.innerText = q.question;
+    optionsWrap.innerHTML = '';
+    localAnswered = false;
+    // create options
+    q.options.forEach((opt, i)=>{
+      const d = document.createElement('div'); d.className='option'; d.innerText = opt;
+      d.onclick = async ()=>{
+        if(localAnswered) return;
+        localAnswered = true;
+        d.classList.add('disabled');
+        // write answer to DB: /rooms/{room}/answers/{index}/{playerId} = {choice:i, ts:now()}
+        if(!roomCode || !playerId) return alert('Você deve entrar na sala primeiro.');
+        await answersRef(roomCode, index).child(playerId).set({ choice: i, ts: now() });
+      };
+      optionsWrap.appendChild(d);
+    });
+    // timer
+    const dur = (duration||QUESTION_DURATION) * 1000;
+    const start = startedAt || now();
+    const endAt = start + dur;
+    // update visual timer
+    function tick(){
+      const leftMs = Math.max(0, endAt - now());
+      const pct = Math.max(0, Math.min(100, (leftMs/dur)*100));
+      timerBar.style.width = pct + '%';
+      timeLeft.innerText = Math.ceil(leftMs/1000);
+      if(leftMs>0) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // Show summary: reads /rooms/{code}/summaries/{index}
+  async function showSummary(code, index){
+    summaryArea.innerHTML = '<div class="small">Carregando resumo...</div>';
+    const sSnap = await summariesRef(code, index).once('value');
+    const summary = sSnap.val();
+    if(!summary || !summary.list){ summaryArea.innerHTML = '<div class="small">Nenhuma resposta registrada.</div>'; return; }
+    const list = summary.list;
+    summaryArea.innerHTML = '';
+    // show each answer
+    list.forEach(it=>{
+      const div = document.createElement('div'); div.className='lc';
+      const left = document.createElement('div'); left.innerHTML = `<b>${it.name}</b>`;
+      const right = document.createElement('div'); right.innerHTML = `${ it.choiceIndex===null ? '-' : it.choiceText } ${ it.correct ? '✅' : '❌' }`;
+      div.appendChild(left); div.appendChild(right);
+      summaryArea.appendChild(div);
+    });
+  }
+
+  // Show end ranking
+  async function showEnd(code){
+    questionArea.classList.add('hidden');
+    endArea.classList.remove('hidden');
+    finalRanking.innerHTML = '';
+    const pSnap = await playersRef(code).orderByChild('score').once('value');
+    const obj = pSnap.val() || {};
+    // convert to array and sort desc
+    const arr = Object.keys(obj).map(k=>({ id:k, name: obj[k].name, score: obj[k].score || 0 }));
+    arr.sort((a,b)=> b.score - a.score);
+    arr.forEach((p,i)=>{
+      const d = document.createElement('div'); d.className='lc';
+      d.innerHTML = `<div style="font-weight:700">${i+1}. ${p.name}</div><div class="small">${p.score} pts</div>`;
+      finalRanking.appendChild(d);
+    });
+  }
+
+  // restart local (only resets answers+scores in DB for this room) - careful: used for tests
+  btnRestartLocal.onclick = async ()=>{
+    if(!roomCode) return alert('Entre numa sala antes.');
+    if(!confirm('Reiniciar esta sala (apaga respostas e zera pontuações)?')) return;
+    const r = roomRef(roomCode);
+    // remove answers and summaries and reset players scores
+    await db.ref('rooms/'+roomCode+'/answers').remove();
+    await db.ref('rooms/'+roomCode+'/summaries').remove();
+    const pSnap = await playersRef(roomCode).once('value');
+    const players = pSnap.val() || {};
+    const updates = {};
+    Object.keys(players).forEach(pid=> updates['players/'+pid+'/score'] = 0 );
+    updates['status'] = 'lobby';
+    updates['currentIndex'] = null;
+    updates['startedAt'] = null;
+    await db.ref('rooms/'+roomCode).update(updates);
+    alert('Sala reiniciada (respostas e pontuações zeradas).');
+  };
+
+  // If player leaves (tab closed), optionally remove from players list — optional: we'll try to remove on unload
+  window.addEventListener('beforeunload', ()=>{
+    if(roomCode && playerId){
+      // best-effort removal (not guaranteed)
+      playersRef(roomCode).child(playerId).remove();
+    }
+  });
+
+  // Small helper: auto-fill a room name to test quickly
+  roomInput.value = 'SOUFACIL_TEST';
   </script>
 </body>
 </html>
