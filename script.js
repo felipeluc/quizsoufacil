@@ -21,12 +21,17 @@ const pontosRef = doc(db, "jogo", "pontuacao");
 // Elementos
 const btnA = document.getElementById("btnA");
 const btnB = document.getElementById("btnB");
-const resetBtn = document.getElementById("resetBtn");
 const scoreAEl = document.getElementById("scoreA");
 const scoreBEl = document.getElementById("scoreB");
 const cardEl = document.getElementById("card");
+const msgEl = document.getElementById("mensagem");
+const certoBtn = document.getElementById("certoBtn");
+const erradoBtn = document.getElementById("erradoBtn");
 
-// Escuta placar em tempo real
+// Estado global
+let ultimoTime = null;
+
+// Escuta placar
 onSnapshot(pontosRef, (docSnap) => {
   if (docSnap.exists()) {
     const data = docSnap.data();
@@ -40,7 +45,9 @@ onSnapshot(rodadaRef, (docSnap) => {
   if (docSnap.exists()) {
     const data = docSnap.data();
     if (data.vencedor) {
-      mostrarResultado(data.vencedor, data.correto);
+      ultimoTime = data.vencedor;
+      msgEl.textContent = `${data.vencedor} apertou primeiro!`;
+      cardEl.style.display = "block";
       btnA.disabled = true;
       btnB.disabled = true;
     } else {
@@ -52,38 +59,44 @@ onSnapshot(rodadaRef, (docSnap) => {
 });
 
 // Clique nos botões
-btnA.onclick = () => processarResposta("Time A");
-btnB.onclick = () => processarResposta("Time B");
+btnA.onclick = () => registrarClique("Time A");
+btnB.onclick = () => registrarClique("Time B");
 
-// Função processar resposta
-async function processarResposta(time) {
+async function registrarClique(time) {
   const rodada = await getDoc(rodadaRef);
   if (!rodada.exists() || !rodada.data().vencedor) {
-    // Aqui podemos definir aleatoriamente se está certo ou errado (para exemplo)
-    const correto = Math.random() > 0.5; // 50% chance
-    await setDoc(rodadaRef, { vencedor: time, correto });
-
-    // Atualiza pontos
-    const pontosSnap = await getDoc(pontosRef);
-    let pontos = pontosSnap.exists() ? pontosSnap.data() : { timeA: 0, timeB: 0 };
-    if (time === "Time A") {
-      pontos.timeA += correto ? 100 : -50;
-    } else {
-      pontos.timeB += correto ? 100 : -50;
-    }
-    await setDoc(pontosRef, pontos);
+    await setDoc(rodadaRef, { vencedor: time });
   }
 }
 
-// Mostrar card
-function mostrarResultado(time, correto) {
-  cardEl.style.display = "block";
-  cardEl.className = correto ? "certo" : "errado";
-  cardEl.textContent = `${time} apertou primeiro e ${correto ? "ACERTOU! (+100)" : "ERROU! (-50)"}`;
-}
+// Botão CERTO
+certoBtn.onclick = async () => {
+  if (!ultimoTime) return;
+  const pontosSnap = await getDoc(pontosRef);
+  let pontos = pontosSnap.exists() ? pontosSnap.data() : { timeA: 0, timeB: 0 };
 
-// Reset jogo
-resetBtn.onclick = async () => {
-  await setDoc(rodadaRef, { vencedor: null, correto: null });
-  await setDoc(pontosRef, { timeA: 0, timeB: 0 });
+  if (ultimoTime === "Time A") pontos.timeA += 100;
+  else pontos.timeB += 100;
+
+  await setDoc(pontosRef, pontos);
+  await resetRodada();
 };
+
+// Botão ERRADO
+erradoBtn.onclick = async () => {
+  if (!ultimoTime) return;
+  const pontosSnap = await getDoc(pontosRef);
+  let pontos = pontosSnap.exists() ? pontosSnap.data() : { timeA: 0, timeB: 0 };
+
+  if (ultimoTime === "Time A") pontos.timeA -= 50;
+  else pontos.timeB -= 50;
+
+  await setDoc(pontosRef, pontos);
+  await resetRodada();
+};
+
+// Resetar rodada (sem zerar pontos)
+async function resetRodada() {
+  await setDoc(rodadaRef, { vencedor: null });
+  ultimoTime = null;
+}
