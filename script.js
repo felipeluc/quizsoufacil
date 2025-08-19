@@ -87,4 +87,3 @@ resetBtn.onclick = async () => {
   await setDoc(rodadaRef, { vencedor: null, correto: null });
   await setDoc(pontosRef, { timeA: 0, timeB: 0 });
 };
-
