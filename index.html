@@ -2,158 +2,44 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Simulado SouFácil - Kahoot</title>
+<title>Buzzer de Equipes</title>
 <style>
-body { font-family: Arial, sans-serif; text-align:center; margin:20px;}
-#game, #quiz { display:none; }
-button { padding:10px 20px; margin:5px; cursor:pointer;}
-#playersList { margin-top:20px;}
+  body { text-align: center; font-family: Arial, sans-serif; margin-top: 50px; }
+  button { font-size: 24px; padding: 20px 40px; margin: 10px; }
+  #resultado { font-size: 32px; margin-top: 30px; color: green; }
 </style>
 </head>
 <body>
 
-<h1>Simulado SouFácil</h1>
+<h1>Jogo de Perguntas - Buzzer</h1>
 
-<div id="login">
-  <input type="text" id="playerName" placeholder="Seu nome">
-  <button onclick="joinGame()">Entrar</button>
-</div>
+<button id="timeA">Time A</button>
+<button id="timeB">Time B</button>
+<button id="reset">Reset</button>
 
-<div id="game">
-  <h2>Jogadores na sala:</h2>
-  <ul id="playersList"></ul>
-  <button onclick="startGame()">Iniciar Jogo</button>
-</div>
+<div id="resultado">Quem clicou primeiro?</div>
 
-<div id="quiz">
-  <h2 id="questionText"></h2>
-  <div id="answers"></div>
-  <p id="timer"></p>
-</div>
+<script>
+let vencedor = null;
 
-<div id="results">
-  <h2>Resultados</h2>
-  <ul id="resultsList"></ul>
-</div>
+const resultado = document.getElementById("resultado");
+const botaoA = document.getElementById("timeA");
+const botaoB = document.getElementById("timeB");
+const botaoReset = document.getElementById("reset");
 
-<!-- Firebase SDKs -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.2/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.6.2/firebase-database.js";
-
-// Configuração Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyAns0NBLW8JTmLFRuOSLz16tAXrKuox9rU",
-  authDomain: "comercial-92085.firebaseapp.com",
-  databaseURL: "https://comercial-92085-default-rtdb.firebaseio.com",
-  projectId: "comercial-92085",
-  storageBucket: "comercial-92085.appspot.com",
-  messagingSenderId: "1086266528954",
-  appId: "1:1086266528954:web:91dfc7975e79c5cc141e83"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-let playerName = "";
-let playersRef = ref(db, "players");
-let gameRef = ref(db, "game");
-let currentQuestion = 0;
-let timerInterval;
-
-const questions = [
-  {q:"Qual é a postura correta ao chegar em uma loja para a primeira abordagem?", a:["Mexer no celular", "Chegar sorrindo e mantendo contato visual", "Ficar em silêncio", "Sentar-se sem pedir permissão"], correct:1},
-  {q:"O que é essencial para passar uma boa primeira impressão?", a:["Falar rápido", "Ter uniforme limpo e bem passado", "Usar acessórios chamativos", "Forçar uma venda imediata"], correct:1},
-  {q:"Qual deve ser o tom de voz usado na abordagem?", a:["Alto e autoritário", "Claro, audível e modulado", "Baixo e quase inaudível", "Rápido e apressado"], correct:1},
-  {q:"O que significa escuta ativa?", a:["Interromper o cliente", "Repetir gírias", "Prestar atenção, confirmar e resumir o que o cliente disse", "Deixar o cliente falar sem responder"], correct:2},
-  // ...adicione todas as 80 perguntas aqui seguindo o mesmo formato
-];
-
-function joinGame(){
-  playerName = document.getElementById("playerName").value.trim();
-  if(!playerName) return alert("Digite seu nome");
-  const newPlayerRef = push(playersRef);
-  set(newPlayerRef, {name: playerName, answer:null});
-  document.getElementById("login").style.display="none";
-  document.getElementById("game").style.display="block";
-}
-
-// Listar jogadores em tempo real
-onValue(playersRef, (snapshot)=>{
-  const list = document.getElementById("playersList");
-  list.innerHTML="";
-  snapshot.forEach((snap)=>{
-    list.innerHTML += "<li>"+snap.val().name+"</li>";
-  });
-});
-
-function startGame(){
-  update(gameRef, {started:true});
-}
-
-// Ouvir quando o jogo começou
-onValue(gameRef, (snapshot)=>{
-  if(snapshot.val() && snapshot.val().started){
-    document.getElementById("game").style.display="none";
-    document.getElementById("quiz").style.display="block";
-    showQuestion();
+function clicarTime(time) {
+  if (!vencedor) {
+    vencedor = time;
+    resultado.textContent = `${time} clicou primeiro!`;
   }
+}
+
+botaoA.addEventListener("click", () => clicarTime("Time A"));
+botaoB.addEventListener("click", () => clicarTime("Time B"));
+botaoReset.addEventListener("click", () => {
+  vencedor = null;
+  resultado.textContent = "Quem clicou primeiro?";
 });
-
-function showQuestion(){
-  if(currentQuestion>=questions.length){
-    showResults();
-    return;
-  }
-  const q = questions[currentQuestion];
-  document.getElementById("questionText").innerText = q.q;
-  const answersDiv = document.getElementById("answers");
-  answersDiv.innerHTML="";
-  q.a.forEach((ans,i)=>{
-    const btn = document.createElement("button");
-    btn.innerText = ans;
-    btn.onclick = ()=>submitAnswer(i);
-    answersDiv.appendChild(btn);
-  });
-  let timeLeft = 20;
-  document.getElementById("timer").innerText = "Tempo: "+timeLeft+"s";
-  timerInterval = setInterval(()=>{
-    timeLeft--;
-    document.getElementById("timer").innerText = "Tempo: "+timeLeft+"s";
-    if(timeLeft<=0){
-      clearInterval(timerInterval);
-      submitAnswer(null); // sem resposta
-    }
-  },1000);
-}
-
-function submitAnswer(answerIndex){
-  clearInterval(timerInterval);
-  // atualizar resposta no firebase
-  onValue(playersRef, snapshot=>{
-    snapshot.forEach(snap=>{
-      if(snap.val().name===playerName){
-        update(ref(db,"players/"+snap.key), {answer:answerIndex});
-      }
-    });
-  }, {onlyOnce:true});
-  currentQuestion++;
-  setTimeout(showQuestion,500); // próxima pergunta
-}
-
-function showResults(){
-  document.getElementById("quiz").style.display="none";
-  document.getElementById("results").style.display="block";
-  onValue(playersRef, snapshot=>{
-    const results = document.getElementById("resultsList");
-    results.innerHTML="";
-    snapshot.forEach(snap=>{
-      const player = snap.val();
-      const ansText = player.answer!==null ? questions[player.answer]?.a[player.answer] || "Não respondeu" : "Não respondeu";
-      results.innerHTML += "<li>"+player.name+" respondeu: "+ansText+"</li>";
-    });
-  });
-}
 </script>
 
 </body>
