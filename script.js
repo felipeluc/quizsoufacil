@@ -1,102 +1,103 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// === Importa Firebase ===
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-// Config Firebase
+// Configuração Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyA_3nIU2oEKhxOXvDfmdkKmE93awY08IsI",
   authDomain: "quizsoufacil.firebaseapp.com",
   projectId: "quizsoufacil",
-  storageBucket: "quizsoufacil.firebasestorage.app",
+  storageBucket: "quizsoufacil.appspot.com",
   messagingSenderId: "83352047783",
   appId: "1:83352047783:web:bea92a9debdb2146d5cb82"
 };
 
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Referências
-const rodadaRef = doc(db, "jogo", "rodadaAtual");
-const pontosRef = doc(db, "jogo", "pontuacao");
+// === Referência no Firestore ===
+const gameRef = doc(db, "game", "status");
 
-// Elementos
+// === Elementos da tela ===
 const btnA = document.getElementById("btnA");
 const btnB = document.getElementById("btnB");
-const scoreAEl = document.getElementById("scoreA");
-const scoreBEl = document.getElementById("scoreB");
-const cardEl = document.getElementById("card");
-const msgEl = document.getElementById("mensagem");
+const placarA = document.getElementById("placarA");
+const placarB = document.getElementById("placarB");
+const card = document.getElementById("card");
+const cardText = document.getElementById("cardText");
 const certoBtn = document.getElementById("certoBtn");
 const erradoBtn = document.getElementById("erradoBtn");
+const restartBtn = document.getElementById("restartBtn");
 
-// Estado global
-let ultimoTime = null;
+// === Inicializar jogo no Firestore ===
+async function initGame() {
+  const snap = await getDoc(gameRef);
+  if (!snap.exists()) {
+    await setDoc(gameRef, {
+      timeA: 0,
+      timeB: 0,
+      ultimo: null
+    });
+  }
+}
+initGame();
 
-// Escuta placar
-onSnapshot(pontosRef, (docSnap) => {
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    scoreAEl.textContent = data.timeA ?? 0;
-    scoreBEl.textContent = data.timeB ?? 0;
+// === Botões de clique (Time A / B) ===
+btnA.addEventListener("click", async () => {
+  const snap = await getDoc(gameRef);
+  if (!snap.data().ultimo) {
+    await updateDoc(gameRef, { ultimo: "A" });
   }
 });
 
-// Escuta rodada
-onSnapshot(rodadaRef, (docSnap) => {
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    if (data.vencedor) {
-      ultimoTime = data.vencedor;
-      msgEl.textContent = `${data.vencedor} apertou primeiro!`;
-      cardEl.style.display = "block";
-      btnA.disabled = true;
-      btnB.disabled = true;
-    } else {
-      cardEl.style.display = "none";
-      btnA.disabled = false;
-      btnB.disabled = false;
-    }
+btnB.addEventListener("click", async () => {
+  const snap = await getDoc(gameRef);
+  if (!snap.data().ultimo) {
+    await updateDoc(gameRef, { ultimo: "B" });
   }
 });
 
-// Clique nos botões
-btnA.onclick = () => registrarClique("Time A");
-btnB.onclick = () => registrarClique("Time B");
-
-async function registrarClique(time) {
-  const rodada = await getDoc(rodadaRef);
-  if (!rodada.exists() || !rodada.data().vencedor) {
-    await setDoc(rodadaRef, { vencedor: time });
+// === Certo / Errado ===
+certoBtn.addEventListener("click", async () => {
+  const snap = await getDoc(gameRef);
+  const data = snap.data();
+  if (data.ultimo === "A") {
+    await updateDoc(gameRef, { timeA: data.timeA + 100, ultimo: null });
+  } else if (data.ultimo === "B") {
+    await updateDoc(gameRef, { timeB: data.timeB + 100, ultimo: null });
   }
-}
+});
 
-// Botão CERTO
-certoBtn.onclick = async () => {
-  if (!ultimoTime) return;
-  const pontosSnap = await getDoc(pontosRef);
-  let pontos = pontosSnap.exists() ? pontosSnap.data() : { timeA: 0, timeB: 0 };
+erradoBtn.addEventListener("click", async () => {
+  const snap = await getDoc(gameRef);
+  const data = snap.data();
+  if (data.ultimo === "A") {
+    await updateDoc(gameRef, { timeA: data.timeA - 50, ultimo: null });
+  } else if (data.ultimo === "B") {
+    await updateDoc(gameRef, { timeB: data.timeB - 50, ultimo: null });
+  }
+});
 
-  if (ultimoTime === "Time A") pontos.timeA += 100;
-  else pontos.timeB += 100;
+// === Reiniciar Jogo ===
+restartBtn.addEventListener("click", async () => {
+  await updateDoc(gameRef, {
+    timeA: 0,
+    timeB: 0,
+    ultimo: null
+  });
+});
 
-  await setDoc(pontosRef, pontos);
-  await resetRodada();
-};
+// === Escuta alterações em tempo real ===
+onSnapshot(gameRef, (docSnap) => {
+  const data = docSnap.data();
+  placarA.textContent = data.timeA;
+  placarB.textContent = data.timeB;
 
-// Botão ERRADO
-erradoBtn.onclick = async () => {
-  if (!ultimoTime) return;
-  const pontosSnap = await getDoc(pontosRef);
-  let pontos = pontosSnap.exists() ? pontosSnap.data() : { timeA: 0, timeB: 0 };
-
-  if (ultimoTime === "Time A") pontos.timeA -= 50;
-  else pontos.timeB -= 50;
-
-  await setDoc(pontosRef, pontos);
-  await resetRodada();
-};
-
-// Resetar rodada (sem zerar pontos)
-async function resetRodada() {
-  await setDoc(rodadaRef, { vencedor: null });
-  ultimoTime = null;
-}
+  if (data.ultimo) {
+    card.style.display = "block";
+    cardText.textContent = `Time ${data.ultimo} apertou!`;
+  } else {
+    card.style.display = "none";
+  }
+});
